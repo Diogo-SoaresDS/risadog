@@ -66,6 +66,10 @@ module.exports = {
         const { id } = req.params
         
         try{
+            const existingClient = await knex('clientes').where({ idCliente: id }).first();
+            if (!existingClient) 
+                return res.status(404).json({ error: 'Cliente não encontrado.' })
+            
             await clienteSchema.validate(req.body, { abortEarly: false })
             await knex('clientes').update({
                 nome, 
