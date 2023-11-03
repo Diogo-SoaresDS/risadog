@@ -230,7 +230,7 @@ module.exports = {
     
             if (Array.isArray(animais) || animais.length > 0) {
                 for (const animal of animais) {
-                    const { nome, especie, raca, genero, rga, obs } = animal
+                    const { nome, especie, raca, genero, porte, rga, obs } = animal
         
                     const novoAnimal = {
                         nome,
@@ -238,6 +238,7 @@ module.exports = {
                         raca,
                         genero,
                         rga,
+                        porte,
                         obs,
                         status: 'Ativo'
                     }

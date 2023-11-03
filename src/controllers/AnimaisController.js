@@ -58,7 +58,7 @@ module.exports = {
                 status
             }).where({ idAnimal: id })
 
-            return res.send()
+            return res.send({ message: 'Animal atualizado com sucesso' })
         } catch (error) {
             next(error)
         }
