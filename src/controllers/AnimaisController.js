@@ -10,10 +10,6 @@ module.exports = {
                 return res.status(400).json({ error: 'ID do cliente ausente.' });
             }
     
-            if (!Array.isArray(animais) || animais.length === 0) {
-                return res.status(400).json({ error: 'Nenhum animal fornecido.' });
-            }
-    
             const idsAnimais = [];
             for (const animal of animais) {
                 const { nome, especie, raca, genero, rga, obs } = animal
@@ -65,8 +61,9 @@ module.exports = {
     },
 
     async delete(req, res, next) {
+        const { id } = req.params
+        
         try {
-            const { id } = req.params
             const animalExiste = await knex('animais').where({ idAnimal: id }).first()
 
             if(!animalExiste)
@@ -74,21 +71,21 @@ module.exports = {
             
             const idSolicitacoes = await knex('solicitacoes_de_servicos')
                 .select('idSolicitacao')
-                .where({ idAnimal: id });
+                .where({ idAnimal: id })
           
             if (idSolicitacoes.length > 0) {
-                const idsSolicitacoes = idSolicitacoes.map((solicitacao) => solicitacao.idSolicitacao);
+                const idsSolicitacoes = idSolicitacoes.map((solicitacao) => solicitacao.idSolicitacao)
             
                 await knex('execucoes').whereIn('idItemSolicitacao', function() {
                     this.select('idItemSolicitacao').from('item_solicitacao').whereIn('idSolicitacao', idsSolicitacoes);
-                }).del();
+                }).del()
             
-                await knex('item_solicitacao').whereIn('idSolicitacao', idsSolicitacoes).del();
+                await knex('item_solicitacao').whereIn('idSolicitacao', idsSolicitacoes).del()
             }
         
-            await knex('solicitacoes_de_servicos').where({ idAnimal: id }).del();
-            await knex('propriedades').where({ idAnimal: id }).del();
-            await knex('animais').where({ idAnimal: id }).del();
+            await knex('solicitacoes_de_servicos').where({ idAnimal: id }).del()
+            await knex('propriedades').where({ idAnimal: id }).del()
+            await knex('animais').where({ idAnimal: id }).del()
             return res.send()
         } catch(error) {
             next(error)

@@ -40,9 +40,8 @@ module.exports = {
             }
 
             for (const servico of servicosExistentes) {
-                const idSolicitacao = await knex('solicitacoes_de_servicos')
+                const [idSolicitacao] = await knex('solicitacoes_de_servicos')
                     .insert(novaSolicitacao)
-                    .returning('idSolicitacao')
 
                 await knex('item_solicitacao').insert({
                     idSolicitacao,

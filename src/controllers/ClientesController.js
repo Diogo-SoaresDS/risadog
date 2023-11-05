@@ -19,57 +19,25 @@ const clienteSchema = Yup.object().shape({
     uf: Yup.string().matches(/^[A-Z]{2}$/, 'UF inválido. Deve conter duas letras maiúsculas.'),
 })
 
-module.exports = {
-    async index(req, res, next) {
-        try {
-            const results = await knex('clientes')
+module.exports = { 
+    async index(req, res, next){
+        try{
+            const results = await knex('clientes').select('nome', 'cpf')
             return res.json(results)
         } catch(error){
             next(error)
         }
     },
 
-    async create(req, res, next) {    
-        const { nome, cpf, dtNasc, tel1, tel2, email, cep, logradouro, numeroRes, complemento, bairro, localidade, uf } = req.body
-
-        try {
-            await clienteSchema.validate(req.body, { abortEarly: false })
-            const dataDeCadastro = new Date()
-            await knex('clientes').insert({
-                nome,
-                cpf,
-                dtNasc,
-                tel1,
-                tel2,
-                email,
-                cep,
-                logradouro,
-                numeroRes,
-                complemento,
-                bairro,
-                localidade,
-                uf,
-                status: 'Ativo',
-                dtCadastro: dataDeCadastro
-            })
-
-            return res.status(201).send({ message: 'Cliente criado com sucesso' })
-        } catch (error) {
-            if (error instanceof Yup.ValidationError)
-                return res.status(400).json({ error: error.errors })
-            next(error)
-        }
-    },
-   
     async update(req, res, next) {
-        const { nome, cpf, dtNasc, tel1, tel2, email, cep, logradouro, numeroRes, complemento, bairro, localidade, uf } = req.body
-        const { id } = req.params
+        const { nome, cpf, dtNasc, tel1, tel2, email, cep, logradouro, numeroRes, complemento, bairro, localidade, uf, animais } = req.body
+        const { idCliente } = req.params
         
         try{
-            const existingClient = await knex('clientes').where({ idCliente: id }).first();
+            const existingClient = await knex('clientes').where({ idCliente }).first()
             if (!existingClient) 
                 return res.status(404).json({ error: 'Cliente não encontrado.' })
-            
+
             await clienteSchema.validate(req.body, { abortEarly: false })
             await knex('clientes').update({
                 nome, 
@@ -85,26 +53,31 @@ module.exports = {
                 bairro, 
                 localidade, 
                 uf
-            }).where({ idCliente: id })
-            
-            return res.send()
+            }).where({ idCliente })
+
+            if(Array.isArray(animais) && animais.length > 0){
+                for(const animal of animais){
+                    const { idAnimal, nome, especie, raca, genero, porte, rga, obs } = animal
+                    
+                    if(idAnimal){
+                        await knex('animais').update({
+                            nome,
+                            especie,
+                            raca,
+                            genero,
+                            rga,
+                            obs,
+                            porte,
+                            status: 'Ativo'
+                        }).where({ idAnimal })
+                    }
+                }
+            }
+
+            return res.status(201).send({ message: 'Cliente atualizado com sucesso' })
         } catch (error) {
             if (error instanceof Yup.ValidationError)
-                return res.status(400).json({ error: 'Dados de entrada inválidos', details: error.errors })
-            next(error)
-        }
-    },
-    
-    async delete(req, res, next) {
-        try {
-            const { id } = req.params
-            
-            await knex('clientes')
-                .where({ idCliente: id })
-                .del()
-            
-            return res.send()
-        } catch(error) {
+                return res.status(400).json({ error: error.errors })
             next(error)
         }
     },
@@ -136,20 +109,21 @@ module.exports = {
     },
 
     async listAnimalsClient(req, res, next){
+        const { valor } = req.query
+        
         try {
-            const { valor } = req.query;
             if (!valor) {
-                return res.status(400).json({ error: 'Parâmetro não informado' });
+                return res.status(400).json({ error: 'Parâmetro não informado' })
             }
 
-            let query = knex('clientes');
+            let query = knex('clientes')
             if (!isNaN(valor)) {
-                query.where('cpf', valor);
+                query.where('cpf', valor)
             } else {
-                query.where('nome', 'like', `%${valor}%`);
+                query.where('nome', 'like', `%${valor}%`)
             }
 
-            const cliente = await query.first();
+            const cliente = await query.first()
 
             if (!cliente) {
                 return res.status(404).json({ error: 'Cliente não encontrado' });
@@ -158,11 +132,11 @@ module.exports = {
             const animais = await knex('animais')
                 .select('animais.*')
                 .innerJoin('propriedades', 'animais.idAnimal', 'propriedades.idAnimal')
-                .where('propriedades.idCliente', cliente.idCliente);
+                .where('propriedades.idCliente', cliente.idCliente)
 
-            return res.json(animais);
+            return res.json(animais)
         } catch (error) {
-            next(error);
+            next(error)
         }
     },
 
@@ -194,15 +168,6 @@ module.exports = {
         }
     },
 
-    async listNomesCpf(req, res, next){
-        try{
-            const results = await knex('clientes').select('nome', 'cpf')
-            return res.json(results)
-        } catch(error){
-            next(error)
-        }
-    },
-
     async createClientAnimals(req, res, next){
         const { nome, cpf, dtNasc, tel1, tel2, email, cep, logradouro, numeroRes, complemento, bairro, localidade, uf, animais } = req.body
 
@@ -213,7 +178,6 @@ module.exports = {
 
             await clienteSchema.validate(req.body, { abortEarly: false })
             const dataDeCadastro = new Date()
-
             const [idCliente] = await knex('clientes').insert({
                 nome,
                 cpf,
@@ -232,7 +196,7 @@ module.exports = {
                 dtCadastro: dataDeCadastro
             })
     
-            if (Array.isArray(animais) || animais.length > 0) {
+            if (Array.isArray(animais) && animais.length > 0) {
                 for (const animal of animais) {
                     const { nome, especie, raca, genero, porte, rga, obs } = animal
         
@@ -247,7 +211,8 @@ module.exports = {
                         status: 'Ativo'
                     }
 
-                    const [idAnimal] = await knex('animais').insert(novoAnimal).returning('idAnimal')
+                    const [idAnimal] = await knex('animais').insert(novoAnimal)
+
                     await knex('propriedades').insert({
                         idCliente,
                         idAnimal

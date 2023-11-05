@@ -26,10 +26,10 @@ module.exports = {
     },
     
     async create(req, res, next){
-        const { nome, email, senha} = req.body
+        const { nome, email, senha, especialidades } = req.body
         
         try {
-            if(!nome || !email || !senha){
+            if(!nome || !email || !senha || !especialidades || especialidades === 0){
                 return res.status(400).json({ error: 'Por favor, forneça todos os campos obrigatórios' })
             }
 
@@ -49,7 +49,14 @@ module.exports = {
                 status: 'Ativo'
             }
 
-            await knex('colaboradores').insert(usuario)
+            const [idColaborador] = await knex('colaboradores').insert(usuario)
+            for(const especialidade of especialidades){
+                await knex('especialidades').insert({
+                    idColaborador,
+                    idEspecialidade: especialidade
+                })
+            }
+
             return res.send({
                 usuario, 
                 token: gerarToken({ idColoborador: usuario.idColoborador })
@@ -89,10 +96,17 @@ module.exports = {
         }
     },
 
-    async agendarServicos(req, res, next){
+    async filterToServices(req, res, next){
+        const { id } = req.query
+
         try {
-            
-        } catch(error){
+            const funcionarios = await knex('colaboradores')
+                .distinct('colaboradores.*')
+                .innerJoin('especialidades', 'colaboradores.idColaborador', 'especialidades.idColaborador')
+                .where('especialidades.idServicos', id)
+
+            res.json(funcionarios)
+        } catch (error) {
             next(error)
         }
     }
