@@ -20,7 +20,6 @@ routes.get('/agendas/nova-solicitacao', clientesController.index)
 routes.get('/agendas/cliente', clientesController.buscaClient)
 routes.get('/agendas/cliente/animais', clientesController.listAnimalsClient)
 routes.put('/agendas/cliente/:idCliente', clientesController.update)
-routes.delete('/agendas/cliente/:id', clientesController.delete)
 routes.get('/agendas/nova-solicitacao/:id/animais', clientesController.listAnimals)
 
 // Animais
@@ -36,8 +35,5 @@ routes.get('/agendas/dia', agendasController.indexDay)
 routes.put('/agendas/:id', agendasController.update)
 routes.delete('/agendas/:id', agendasController.delete)
 routes.get('/agendas/filter', agendasController.filterDataAndStatus)
-
-// Pagamento
-routes.get('/agendas/nova-solicitacao/pagamento/:id')
 
 module.exports = routes
