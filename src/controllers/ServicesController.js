@@ -3,7 +3,7 @@ const knex = require('knex')
 module.exports = {
     async index(req, res, next) {
         try {
-            const results = await knex('servicos').select('servicos.nome')
+            const results = await knex('servicos').select('idServico', 'nome', 'preco_p', 'preco_m', '')
             return res.json(results)
         } catch(error){
             next(error)

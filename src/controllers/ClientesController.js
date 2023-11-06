@@ -156,7 +156,7 @@ module.exports = {
         }
 
         try {
-            const cliente = await query.first()
+            const cliente = await query
 
             if (cliente) {
                 return res.json(cliente)

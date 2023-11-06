@@ -14,7 +14,7 @@ module.exports = {
         try {
             const { idCliente, idAnimal, idEspecialidade, inicio, termino, duracao, obs, avalicao, feedback, status, preco } = req.body
 
-            const { servicos } = req.query;
+            const { servicos } = req.query
             if (!servicos || !Array.isArray(servicos)) {
                 return res.status(400).json({ error: 'Serviço ausente ou formato incorreto.' })
             }
@@ -160,5 +160,5 @@ module.exports = {
         } catch(error){
             next(error)
         }
-    },
+    }
 }
