@@ -36,8 +36,13 @@ routes.get('/agendas/dia', agendasController.indexDay)
 routes.put('/agendas/:id', agendasController.update)
 routes.delete('/agendas/:id', agendasController.delete)
 routes.get('/agendas/filter', agendasController.filterDataAndStatus)
+routes.post('/solicitacao', agendasController.solicitacao)
 
-// Serviço
+// Execuções
+routes.post('/execucoes')
+
+// Serviços
 routes.get('/servicos', servicesController.index)
+
 
 module.exports = routes

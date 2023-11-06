@@ -198,9 +198,10 @@ module.exports = {
     
             if (Array.isArray(animais) && animais.length > 0) {
                 for (const animal of animais) {
-                    const { nome, especie, raca, genero, porte, rga, obs } = animal
+                    const { idAnimal, nome, especie, raca, genero, porte, rga, obs } = animal
         
                     const novoAnimal = {
+                        idAnimal,
                         nome,
                         especie,
                         raca,
@@ -211,8 +212,7 @@ module.exports = {
                         status: 'Ativo'
                     }
 
-                    const [idAnimal] = await knex('animais').insert(novoAnimal)
-
+                    await knex('animais').insert(novoAnimal)
                     await knex('propriedades').insert({
                         idCliente,
                         idAnimal

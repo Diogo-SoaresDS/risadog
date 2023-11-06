@@ -160,5 +160,39 @@ module.exports = {
         } catch(error){
             next(error)
         }
+    },
+
+    async solicitacaoCreate(req, res, next){
+        try {
+            const { idCliente, idAnimal, idEspecialidade, data, horaInicio, horaTermino, preco, desconto, execucoes } = req.body
+
+            const [idSolicitacao] = await knex('solicitacao_de_servicos').insert({
+                idCliente,
+                idAnimal,
+                idEspecialidade,
+                inicio: `${data} ${horaInicio}`,
+                termino: `${data} ${horaTermino}`,
+                preco,
+                desconto,
+                status: 'Pendente'
+            })
+
+            const { idServicos, idEspecialidadeOrca, idColaborador, nomeColaborador, agendaExecucao, adicional } = execucoes
+
+            const [idItemSolicitacao] = await knex('item_solicitacao').insert({
+                idServicos,
+                adicional
+            })
+
+            await knex('execucoes').insert({
+                idItemSolicitacao,
+                idEspecialidade: idEspecialidadeOrca,
+                agenda: agendaExecucao
+            })
+            
+            return res.status(201).send({ message: 'Solicitação criada com sucesso' })
+        } catch(error){
+            next(error)
+        }
     }
 }
