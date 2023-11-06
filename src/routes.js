@@ -5,6 +5,7 @@ const colaboradoresController = require('./controllers/ColoboradoresController')
 const clientesController = require('./controllers/ClientesController')
 const animaisController = require('./controllers/AnimaisController')
 const agendasController = require('./controllers/AgendasController')
+const servicesController = require('./controllers/ServicesController')
 
 routes.post('/cadastro', colaboradoresController.create)
 routes.post('/login', colaboradoresController.login)
@@ -35,5 +36,8 @@ routes.get('/agendas/dia', agendasController.indexDay)
 routes.put('/agendas/:id', agendasController.update)
 routes.delete('/agendas/:id', agendasController.delete)
 routes.get('/agendas/filter', agendasController.filterDataAndStatus)
+
+// Serviço
+routes.get('/servicos', servicesController.index)
 
 module.exports = routes
