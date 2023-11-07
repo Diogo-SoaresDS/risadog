@@ -162,9 +162,9 @@ module.exports = {
             if (cliente) {
                 const formattedClientes = cliente.map((cliente) => {
                     if (cliente.dtCadastro)
-                        cliente.dtCadastro = new Date(cliente.dtCadastro).toISOString().replace('Z', '')
+                        cliente.dtCadastro = new Date(cliente.dtCadastro).toISOString().split('T', 1)[0]
                     if (cliente.dtNasc)
-                        cliente.dtNasc = new Date(cliente.dtNasc).toISOString().replace('Z', '')
+                        cliente.dtNasc = new Date(cliente.dtNasc).toISOString().split('T', 1)[0]
                     return cliente
                 })
                 return res.json(formattedClientes)

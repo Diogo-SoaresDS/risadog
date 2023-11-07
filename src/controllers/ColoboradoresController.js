@@ -26,10 +26,10 @@ module.exports = {
     },
     
     async create(req, res, next){
-        const { nome, email, senha, especialidades } = req.body
+        const { nome, email, senha, cpf, especialidades } = req.body
         
         try {
-            if(!nome || !email || !senha || !especialidades || especialidades === 0){
+            if(!nome || !email || !senha || !cpf || !especialidades || especialidades === 0){
                 return res.status(400).json({ error: 'Por favor, forneça todos os campos obrigatórios' })
             }
 
@@ -45,6 +45,7 @@ module.exports = {
             const usuario = {
                 nome,
                 email,
+                cpf,
                 senha: hashSenha,
                 status: 'Ativo'
             }
