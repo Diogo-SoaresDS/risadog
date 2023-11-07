@@ -71,11 +71,12 @@ module.exports = {
                     }
 
                     const idExiste = await knex('animais').select('idAnimal')
-
-                    if(idAnimal === idExiste){
-                        await knex('animais').update(dadosAnimal).where({ idAnimal })
-                    } else {
-                        await knex('animais').insert(dadosAnimal)
+                    for(const existe of idExiste){
+                        if(idAnimal === existe){
+                            await knex('animais').update(dadosAnimal).where({ idAnimal })
+                        } else {
+                            await knex('animais').insert(dadosAnimal)
+                        }
                     }
                 }
             }
