@@ -198,7 +198,7 @@ module.exports = {
                     await knex('animais').insert(novoAnimal)
                     await knex('propriedades').insert({
                         idCliente,
-                        idAnimal
+                        idAnimal: id
                     })
                 }
             }
