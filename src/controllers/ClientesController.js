@@ -60,6 +60,7 @@ module.exports = {
                     const { idAnimal, nome, especie, raca, genero, porte, rga, obs } = animal
                     
                     const dadosAnimal = {
+                        idAnimal,
                         nome,
                         especie,
                         raca,
@@ -76,8 +77,6 @@ module.exports = {
                         if(idAnimal === existe){ 
                             animalExiste = true
                             break
-                        } else {
-                            animalExiste = false
                         }
                     }
 
