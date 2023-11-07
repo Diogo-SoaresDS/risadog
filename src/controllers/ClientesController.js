@@ -181,10 +181,10 @@ module.exports = {
     
             if (Array.isArray(animais) && animais.length > 0) {
                 for (const animal of animais) {
-                    const { idAnimal, nome, especie, raca, genero, porte, rga, obs } = animal
+                    const { id, nome, especie, raca, genero, porte, rga, obs } = animal
         
                     const novoAnimal = {
-                        idAnimal,
+                        idAnimal: id,
                         nome,
                         especie,
                         raca,
