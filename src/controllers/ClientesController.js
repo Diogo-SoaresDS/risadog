@@ -58,8 +58,9 @@ module.exports = {
             if(Array.isArray(animais) && animais.length > 0){
                 for(const animal of animais){
                     const { idAnimal, nome, especie, raca, genero, porte, rga, obs } = animal
-                    
-                    if(idAnimal){
+
+                    const idExiste = await knex('animais').select('idAnimal').where({ idAnimal }).first()
+                    if(idExiste && idExiste.idAnimal === idAnimal){
                         await knex('animais').update({
                             nome,
                             especie,
@@ -72,6 +73,7 @@ module.exports = {
                         }).where({ idAnimal })
                     } else {
                         await knex('animais').insert({
+                            idAnimal,
                             nome,
                             especie,
                             raca,
@@ -81,6 +83,7 @@ module.exports = {
                             porte,
                             status: 'Ativo'
                         })
+
                         await knex('propriedades').insert({
                             idCliente,
                             idAnimal
@@ -89,7 +92,7 @@ module.exports = {
                 }
             }
 
-            return res.status(201).send({ message: 'Cliente atualizado com sucesso' })
+            return res.status(201).send({ message: 'Cliente atualizado com sucesso'})
         } catch (error) {
             if (error instanceof Yup.ValidationError)
                 return res.status(400).json({ error: error.errors })
