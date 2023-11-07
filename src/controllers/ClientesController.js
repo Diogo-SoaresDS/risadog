@@ -178,7 +178,7 @@ module.exports = {
                 return res.status(400).json({ error: 'CPF já está em uso.' })
 
             await clienteSchema.validate(req.body, { abortEarly: false })
-            const dataDeCadastro = new Date()
+            const dataDeCadastro = new Date('yyyy-mm-dd')
             const [idCliente] = await knex('clientes').insert({
                 nome,
                 cpf,
