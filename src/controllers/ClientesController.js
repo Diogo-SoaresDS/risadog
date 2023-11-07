@@ -70,13 +70,21 @@ module.exports = {
                         status: 'Ativo'
                     }
 
+                    let animalExiste = false
                     const idExiste = await knex('animais').select('idAnimal')
                     for(const existe of idExiste){
-                        if(idAnimal === existe){
-                            await knex('animais').update(dadosAnimal).where({ idAnimal })
+                        if(idAnimal === existe){ 
+                            animalExiste = true
+                            break
                         } else {
-                            await knex('animais').insert(dadosAnimal)
+                            animalExiste = false
                         }
+                    }
+
+                    if(animalExiste){
+                        await knex('animais').update(dadosAnimal).where({ idAnimal })
+                    } else {
+                        await knex('animais').insert(dadosAnimal)
                     }
                 }
             }
