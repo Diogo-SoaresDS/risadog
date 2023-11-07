@@ -85,6 +85,10 @@ module.exports = {
                         await knex('animais').update(dadosAnimal).where({ idAnimal })
                     } else {
                         await knex('animais').insert(dadosAnimal)
+                        await knex('propriedades').insert({
+                            idCliente,
+                            idAnimal
+                        })
                     }
                 }
             }
