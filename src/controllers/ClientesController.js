@@ -59,17 +59,23 @@ module.exports = {
                 for(const animal of animais){
                     const { idAnimal, nome, especie, raca, genero, porte, rga, obs } = animal
                     
-                    if(idAnimal){
-                        await knex('animais').update({
-                            nome,
-                            especie,
-                            raca,
-                            genero,
-                            rga,
-                            obs,
-                            porte,
-                            status: 'Ativo'
-                        }).where({ idAnimal })
+                    const dadosAnimal = {
+                        nome,
+                        especie,
+                        raca,
+                        genero,
+                        rga,
+                        obs,
+                        porte,
+                        status: 'Ativo'
+                    }
+
+                    const idExiste = await knex('animais').select('idAnimal')
+
+                    if(idAnimal === idExiste){
+                        await knex('animais').update(dadosAnimal).where({ idAnimal })
+                    } else {
+                        await knex('animais').insert(dadosAnimal)
                     }
                 }
             }
