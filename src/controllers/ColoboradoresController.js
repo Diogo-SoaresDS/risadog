@@ -54,7 +54,7 @@ module.exports = {
             for(const especialidade of especialidades){
                 await knex('especialidades').insert({
                     idColaborador,
-                    idEspecialidade: especialidade
+                    idServicos: especialidade
                 })
             }
 

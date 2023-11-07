@@ -166,7 +166,7 @@ module.exports = {
         const { idCliente, idAnimal, idEspecialidade, data, horaInicio, horaTermino, preco, desconto, execucoes } = req.body
         
         try {
-            const [idSolicitacao] = await knex('solicitacao_de_servicos').insert({
+            await knex('solicitacao_de_servicos').insert({
                 idCliente,
                 idAnimal,
                 idEspecialidade,
