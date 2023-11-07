@@ -25,8 +25,8 @@ routes.get('/agendas/nova-solicitacao/:id/animais', clientesController.listAnima
 
 // Animais
 routes.post('/agendas/nova-solicitacao/:id/animais', animaisController.create)
-routes.put('/agendas/nova-solicitacao/animais/:id', animaisController.update)
-routes.delete('/agendas/nova-solicitacao/animais/:id', animaisController.delete)
+routes.put('/agendas/nova-solicitacao/animais/:idAnimal', animaisController.update)
+routes.delete('/agendas/nova-solicitacao/animais/:idAnimal', animaisController.delete)
 routes.get('/agendas/nova-solicitacao/animais/:id', animaisController.listAgender)
 
 // Agendas

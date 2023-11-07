@@ -113,7 +113,18 @@ module.exports = {
 
     async ColaboradorRead(req, res, next){
         try {
+            const colaborador = await knex('colaboradores').select('idColaborador', 'nome')
+            const agenda = await knex('agendas').select('data')
             
+        } catch(error){
+            next(error)
+        }
+    },
+
+    async agendaCreate(req, res, next){
+        try {
+            
+
         } catch(error){
             next(error)
         }

@@ -3,18 +3,19 @@ const knex = require('../database')
 module.exports = {
     async create(req, res, next) {
         try {
-            const { animais } = req.body;
-            const { id } = req.params;
+            const { animais } = req.body
+            const { idCliente } = req.params
     
-            if (!id) {
+            if (!idCliente) {
                 return res.status(400).json({ error: 'ID do cliente ausente.' });
             }
     
-            const idsAnimais = [];
+            const idsAnimais = []
             for (const animal of animais) {
-                const { nome, especie, raca, genero, rga, obs } = animal
+                const { id, nome, especie, raca, genero, rga, obs } = animal
     
                 const novoAnimal = {
+                    idAnimal: id,
                     nome,
                     especie,
                     raca,
@@ -26,11 +27,11 @@ module.exports = {
 
                 const [idAnimal] = await knex('animais').insert(novoAnimal).returning('idAnimal')
                 await knex('propriedades').insert({
-                    idCliente: id,
-                    idAnimal
+                    idCliente,
+                    idAnimal: id
                 })
     
-                idsAnimais.push(idAnimal);
+                idsAnimais.push(idAnimal)
             }
     
             return res.status(201).json({ message: 'Animais criados com sucesso'})
@@ -41,7 +42,7 @@ module.exports = {
 
     async update(req, res, next) {
         const { nome, especie, raca, genero, rga, obs, status } = req.body
-        const { id } = req.params
+        const { idAnimal } = req.params
 
         try{
             await knex('animais').update({
@@ -52,7 +53,7 @@ module.exports = {
                 rga,
                 obs,
                 status
-            }).where({ idAnimal: id })
+            }).where({ idAnimal })
 
             return res.send({ message: 'Animal atualizado com sucesso' })
         } catch (error) {
@@ -61,17 +62,17 @@ module.exports = {
     },
 
     async delete(req, res, next) {
-        const { id } = req.params
+        const { idAnimal } = req.params
         
         try {
-            const animalExiste = await knex('animais').where({ idAnimal: id }).first()
+            const animalExiste = await knex('animais').where({ idAnimal }).first()
 
             if(!animalExiste)
                 return res.status(404).json({ error: 'Animal não encontrado' })
             
             const idSolicitacoes = await knex('solicitacoes_de_servicos')
                 .select('idSolicitacao')
-                .where({ idAnimal: id })
+                .where({ idAnimal })
           
             if (idSolicitacoes.length > 0) {
                 const idsSolicitacoes = idSolicitacoes.map((solicitacao) => solicitacao.idSolicitacao)
@@ -83,9 +84,9 @@ module.exports = {
                 await knex('item_solicitacao').whereIn('idSolicitacao', idsSolicitacoes).del()
             }
         
-            await knex('solicitacoes_de_servicos').where({ idAnimal: id }).del()
-            await knex('propriedades').where({ idAnimal: id }).del()
-            await knex('animais').where({ idAnimal: id }).del()
+            await knex('solicitacoes_de_servicos').where({ idAnimal }).del()
+            await knex('propriedades').where({ idAnimal }).del()
+            await knex('animais').where({ idAnimal }).del()
             return res.send()
         } catch(error) {
             next(error)
