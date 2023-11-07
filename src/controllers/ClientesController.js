@@ -160,7 +160,14 @@ module.exports = {
             const cliente = await query
 
             if (cliente) {
-                return res.json(cliente)
+                const formattedClientes = cliente.map((cliente) => {
+                    if (cliente.dtCadastro)
+                        cliente.dtCadastro = new Date(cliente.dtCadastro).toISOString().replace('Z', '')
+                    if (cliente.dtNasc)
+                        cliente.dtNasc = new Date(cliente.dtNasc).toISOString().replace('Z', '')
+                    return cliente
+                })
+                return res.json(formattedClientes)
             } else {
                 return res.status(404).json({ error: 'Cliente não encontrado' })
             }
@@ -178,7 +185,7 @@ module.exports = {
                 return res.status(400).json({ error: 'CPF já está em uso.' })
 
             await clienteSchema.validate(req.body, { abortEarly: false })
-            const dataDeCadastro = new Date('yyyy-mm-dd')
+            const dataDeCadastro = new Date()
             const [idCliente] = await knex('clientes').insert({
                 nome,
                 cpf,
