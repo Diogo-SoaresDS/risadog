@@ -109,30 +109,13 @@ module.exports = {
     },
 
     async listAnimalsClient(req, res, next){
-        const { valor } = req.query
+        const { idCliente } = req.params
         
         try {
-            if (!valor) {
-                return res.status(400).json({ error: 'Parâmetro não informado' })
-            }
-
-            let query = knex('clientes')
-            if (!isNaN(valor)) {
-                query.where('cpf', valor)
-            } else {
-                query.where('nome', 'like', `%${valor}%`)
-            }
-
-            const cliente = await query.first()
-
-            if (!cliente) {
-                return res.status(404).json({ error: 'Cliente não encontrado' });
-            }
-
             const animais = await knex('animais')
                 .select('animais.*')
                 .innerJoin('propriedades', 'animais.idAnimal', 'propriedades.idAnimal')
-                .where('propriedades.idCliente', cliente.idCliente)
+                .where('propriedades.idCliente', idCliente)
 
             return res.json(animais)
         } catch (error) {

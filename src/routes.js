@@ -19,7 +19,7 @@ routes.post('/colaborador', colaboradoresController.filterToServices)
 routes.post('/agendas/nova-solicitacao', clientesController.createClientAnimals)
 routes.get('/agendas/nova-solicitacao', clientesController.index)
 routes.get('/agendas/cliente', clientesController.buscaClient)
-routes.get('/agendas/cliente/animais', clientesController.listAnimalsClient)
+routes.get('/agendas/cliente/animais/:idCliente', clientesController.listAnimalsClient)
 routes.put('/agendas/cliente/:idCliente', clientesController.update)
 routes.get('/agendas/nova-solicitacao/:id/animais', clientesController.listAnimals)
 
@@ -36,13 +36,15 @@ routes.get('/agendas/dia', agendasController.indexDay)
 routes.put('/agendas/:id', agendasController.update)
 routes.delete('/agendas/:id', agendasController.delete)
 routes.get('/agendas/filter', agendasController.filterDataAndStatus)
-routes.post('/solicitacao', agendasController.solicitacao)
+routes.get('/solicitacao', agendasController.execucaoRead)
+routes.post('/solicitacao', agendasController.solicitacaoCreate)
+routes.put('/solicitacao', agendasController.solicitacaoUpdate)
+routes.delete('/solicitacao/:idSolicitacao', agendasController.solicitacaoDelete)
 
 // Execuções
 routes.post('/execucoes')
 
 // Serviços
 routes.get('/servicos', servicesController.index)
-
 
 module.exports = routes

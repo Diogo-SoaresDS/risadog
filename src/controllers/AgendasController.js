@@ -163,9 +163,9 @@ module.exports = {
     },
 
     async solicitacaoCreate(req, res, next){
+        const { idCliente, idAnimal, idEspecialidade, data, horaInicio, horaTermino, preco, desconto, execucoes } = req.body
+        
         try {
-            const { idCliente, idAnimal, idEspecialidade, data, horaInicio, horaTermino, preco, desconto, execucoes } = req.body
-
             const [idSolicitacao] = await knex('solicitacao_de_servicos').insert({
                 idCliente,
                 idAnimal,
@@ -191,6 +191,88 @@ module.exports = {
             })
             
             return res.status(201).send({ message: 'Solicitação criada com sucesso' })
+        } catch(error){
+            next(error)
+        }
+    },
+
+    async solicitacaoUpdate(req, res, next){
+        try {
+            const { idSolicitacao, idCliente, idAnimal, idEspecialidade, data, horaInicio, horaTermino, preco, desconto, execucoes } = req.body
+
+            await knex('solicitacao_de_servicos')
+                .where({ idSolicitacao }).update({
+                idCliente,
+                idAnimal,
+                idEspecialidade,
+                inicio: `${data} ${horaInicio}`,
+                termino: `${data} ${horaTermino}`,
+                preco,
+                desconto,
+            })
+
+            for (const execucao of execucoes) {
+                await knex('execucoes')
+                    .where({ idExecucao: execucao.idExecucao }).update({
+                        idEspecialidade: execucao.idEspecialidade,
+                        agenda: execucao.agendaExecucao,
+                })
+
+                await knex('item_solicitacao')
+                    .where({ idItemSolicitacao: execucao.idItemSolicitacao }).update({
+                        idServicos: execucao.idServicos,
+                        adicional: execucao.adicional,
+                })
+            }
+
+            return res.send({ message: 'Solicitação atualizada com sucesso' });
+        } catch(error){
+            next(error)
+        }
+    },
+
+    async solicitacaoDelete(req, res, next){
+        try {
+            const { idSolicitacao } = req.params
+
+            if (!idSolicitacao)
+              return res.status(400).json({ error: 'ID de solicitação inválido' })
+        
+            const solicitacao = await knex('solicitacao_de_servicos').where({ idSolicitacao }).first()
+            if (!solicitacao)
+              return res.status(404).json({ error: 'Solicitação não encontrada' })
+
+            await knex('execucoes').where({ idSolicitacao }).del();
+            await knex('item_solicitacao').where({ idSolicitacao }).del()
+            const deletedRows = await knex('solicitacao_de_servicos').where({ idSolicitacao }).del()
+
+            if (deletedRows === 0)
+              return res.status(404).json({ error: 'Falha ao excluir a solicitação' })
+
+            return res.status(200).json({ message: 'Solicitação excluída com sucesso' })
+        } catch(error){
+            next(error)
+        }
+    },
+
+    async execucaoRead(req, res, next){
+        try {
+            const execucoes = await knex('execucoes')
+            .select(
+                'item_solicitacao.idServico as idServico',
+                'execucoes.idExecucao as idExecucao',
+                'execucoes.idEspecialidade as idEspecialidade',
+                'especialidades.idColaborador as idColaborador',
+                'colaboradores.nome as nomeColaborador',
+                'agendas.data as agendaExecucao',
+                'item_solicitacao.adicional as adicional'
+              )
+              .innerJoin('especialidades', 'execucoes.idEspecialidade', 'especialidades.idEspecialidade')
+              .innerJoin('colaboradores', 'especialidades.idColaborador', 'colaboradores.idColaborador')
+              .innerJoin('agendas', 'execucoes.idExecucao', 'agendas.idExecucao')
+              .innerJoin('item_solicitacao', 'execucoes.idServico', 'item_solicitacao.idServicos')
+        
+            return res.send({ execucoes })
         } catch(error){
             next(error)
         }

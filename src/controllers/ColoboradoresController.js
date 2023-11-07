@@ -110,4 +110,12 @@ module.exports = {
             next(error)
         }
     },
+
+    async ColaboradorRead(req, res, next){
+        try {
+            
+        } catch(error){
+            next(error)
+        }
+    }
 }
