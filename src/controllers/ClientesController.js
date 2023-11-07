@@ -133,7 +133,7 @@ module.exports = {
         let query = knex('clientes')
 
         if (!isNaN(valor)) {
-            query.where('cpf', valor)
+            query.where('cpf', 'like', `%${valor}%`)
         } else {
             query.where('nome', 'like', `%${valor}%`)
         }
