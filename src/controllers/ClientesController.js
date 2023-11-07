@@ -59,31 +59,28 @@ module.exports = {
                 for(const animal of animais){
                     const { idAnimal, nome, especie, raca, genero, porte, rga, obs } = animal
                     
-                    const dadosAnimal = {
-                        idAnimal,
-                        nome,
-                        especie,
-                        raca,
-                        genero,
-                        rga,
-                        obs,
-                        porte,
-                        status: 'Ativo'
-                    }
-
-                    let animalExiste = false
-                    const idExiste = await knex('animais').select('idAnimal')
-                    for(const existe of idExiste){
-                        if(idAnimal === existe){ 
-                            animalExiste = true
-                            break
-                        }
-                    }
-
-                    if(animalExiste){
-                        await knex('animais').update(dadosAnimal).where({ idAnimal })
+                    if(idAnimal){
+                        await knex('animais').update({
+                            nome,
+                            especie,
+                            raca,
+                            genero,
+                            rga,
+                            obs,
+                            porte,
+                            status: 'Ativo'
+                        }).where({ idAnimal })
                     } else {
-                        await knex('animais').insert(dadosAnimal)
+                        await knex('animais').insert({
+                            nome,
+                            especie,
+                            raca,
+                            genero,
+                            rga,
+                            obs,
+                            porte,
+                            status: 'Ativo'
+                        })
                         await knex('propriedades').insert({
                             idCliente,
                             idAnimal
