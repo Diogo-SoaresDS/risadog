@@ -113,9 +113,48 @@ module.exports = {
 
     async ColaboradorRead(req, res, next){
         try {
-            const colaborador = await knex('colaboradores').select('idColaborador', 'nome')
-            const agenda = await knex('agendas').select('data')
+            const colaboradores = await knex('colaboradores')
+                .select(
+                    'colaboradores.idColaborador as idColaborador',
+                    'colaboradores.nome as nomeColaborador',
+                    'agenda.data as dataAgenda',
+                    'especialidades.idEspecialidade as idEspecialidade',
+                    'especialidades.idServico as idServico',
+                    'servico.nome as nomeServico'
+                )
+                .innerJoin('agendas', 'agendas.idColaborador', 'colaboradores.idColaborador')
+                .innerJoin('especialidades', 'especialidades.idColaborador', 'colaborador.idColaborador')
+                .innerJoin('servicos', 'servicos.idServico', 'especialidades.idServicos')
+
+                const result = []
+
+                colaboradores.forEach((colaborador) => {
+                  const existingColaborador = result.find((c) => c.idColaborador === colaborador.idColaborador)
             
+                  if (!existingColaborador) {
+                    result.push({
+                      idColaborador: colaborador.idColaborador,
+                      nomeColaborador: colaborador.nomeColaborador,
+                      agenda: colaborador.agenda,
+                      dataAgenda: colaborador.dataAgenda,
+                      especialidades: [
+                        {
+                          idEspecialidade: colaborador.idEspecialidade,
+                          idServico: colaborador.idServico,
+                          nomeServico: colaborador.nomeServico,
+                        },
+                      ],
+                    })
+                  } else {
+                    existingColaborador.especialidades.push({
+                      idEspecialidade: colaborador.idEspecialidade,
+                      idServico: colaborador.idServico,
+                      nomeServico: colaborador.nomeServico,
+                    })
+                  }
+                })
+            
+                res.json({ colaboradores: result })
         } catch(error){
             next(error)
         }
@@ -124,7 +163,6 @@ module.exports = {
     async agendaCreate(req, res, next){
         try {
             
-
         } catch(error){
             next(error)
         }
