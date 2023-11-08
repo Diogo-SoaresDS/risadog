@@ -257,20 +257,10 @@ module.exports = {
 
     async execucaoRead(req, res, next){
         try {
-            const execucoes = await knex('execucoes')
-            .select(
-                'item_solicitacao.idServico as idServico',
-                'execucoes.idExecucao as idExecucao',
-                'execucoes.idEspecialidade as idEspecialidade',
-                'especialidades.idColaborador as idColaborador',
-                'colaboradores.nome as nomeColaborador',
-                'agendas.data as agendaExecucao',
-                'item_solicitacao.adicional as adicional'
-              )
-              .innerJoin('especialidades', 'execucoes.idEspecialidade', 'especialidades.idEspecialidade')
-              .innerJoin('colaboradores', 'especialidades.idColaborador', 'colaboradores.idColaborador')
-              .innerJoin('agendas', 'execucoes.idExecucao', 'agendas.idExecucao')
-              .innerJoin('item_solicitacao', 'execucoes.idServico', 'item_solicitacao.idServicos')
+            const execucoes = await knex('servicos')
+                .select(
+                    ''
+                )
         
             return res.send({ execucoes })
         } catch(error){
