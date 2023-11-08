@@ -161,9 +161,45 @@ module.exports = {
         }
     },
 
-    async agendaCreate(req, res, next){
+    async agendaRead(req, res, next){
         try {
-            
+            const colaboradores = await knex('colaboradores')
+                .select(
+                    'colaboradores.idColaborador as idColaborador',
+                    'colaboradores.nome as nomeColaborador',
+                    'agendas.objAgenda as objAgenda',
+                    'agendas.data as dataAgenda',
+                    'especialidades.idEspecialidade as idEspecialidade',
+                    'especialidades.idServicos as idServico',
+                    'servicos.nome as nomeServico'
+                )
+                .leftJoin('agendas', 'agendas.idColaborador', 'colaboradores.idColaborador')
+                .leftJoin('especialidades', 'especialidades.idColaborador', 'colaboradores.idColaborador')
+                .leftJoin('servicos', 'servicos.idServicos', 'especialidades.idServicos')
+      
+            const colaboradoresGrouped = {}
+            colaboradores.forEach((colaborador) => {
+                if (!colaboradoresGrouped[colaborador.idColaborador]) {
+                    colaborador.dataAgenda = new Date(colaborador.dataAgenda).toISOString().split('T', 1)[0]
+                    colaboradoresGrouped[colaborador.idColaborador] = {
+                        idColaborador: colaborador.idColaborador,
+                        nomeColaborador: colaborador.nomeColaborador,
+                        objAgenda: colaborador.objAgenda || "00000000000000000000000000000000000000000000",
+                        dataAgenda: colaborador.dataAgenda,
+                        especialidades: [],
+                    }
+                }
+                if (colaborador.idEspecialidade) {
+                    colaboradoresGrouped[colaborador.idColaborador].especialidades.push({
+                        idEspecialidade: colaborador.idEspecialidade,
+                        idServicos: colaborador.idServico,
+                        nomeServico: colaborador.nomeServico,
+                    })
+                }
+            })
+        
+            const colaboradoresArray = Object.values(colaboradoresGrouped)
+            return res.json({ colaboradores: colaboradoresArray })
         } catch(error){
             next(error)
         }
