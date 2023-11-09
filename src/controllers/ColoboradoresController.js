@@ -189,7 +189,7 @@ module.exports = {
                         colaboradoresGrouped[colaborador.idColaborador] = {
                         idColaborador: colaborador.idColaborador,
                         nomeColaborador: colaborador.nomeColaborador,
-                        objAgenda: colaborador.objAgenda,
+                        objAgenda: colaborador.objAgenda || '00000000000000000000000000000000000000000000',
                         dataAgenda: colaborador.dataAgenda,
                         especialidades: [],
                     }
@@ -216,7 +216,7 @@ module.exports = {
                 .leftJoin('agendas', 'agendas.idColaborador', 'colaboradores.idColaborador')
                 .leftJoin('especialidades', 'especialidades.idColaborador', 'colaboradores.idColaborador')
                 .leftJoin('servicos', 'servicos.idServicos', 'especialidades.idServicos')
-                .where('agendas.objAgenda', '00000000000000000000000000000000000000000000')
+                .where('agendas.objAgenda', '')
 
             const colaboradoresGroupedZeros = {}
             const colaboradoresObjAgenda = await queryZeros
@@ -226,7 +226,7 @@ module.exports = {
                         colaboradoresGroupedZeros[colaborador.idColaborador] = {
                         idColaborador: colaborador.idColaborador,
                         nomeColaborador: colaborador.nomeColaborador,
-                        objAgenda: colaborador.objAgenda,
+                        objAgenda: '00000000000000000000000000000000000000000000',
                         dataAgenda: colaborador.dataAgenda,
                         especialidades: [],
                     }
