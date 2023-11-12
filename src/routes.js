@@ -15,6 +15,7 @@ routes.post('/login', colaboradoresController.login)
 routes.get('/agendas', colaboradoresController.index)
 routes.post('/colaborador', colaboradoresController.filterToServices)
 routes.get('/agendas/colaboradores', colaboradoresController.agendaRead)
+routes.get('/agendas/colaboradores/lista', colaboradoresController.listaTodos)
 
 // Clientes
 routes.post('/agendas/nova-solicitacao', clientesController.createClientAnimals)
