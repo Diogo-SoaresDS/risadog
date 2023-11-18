@@ -61,7 +61,7 @@ module.exports = {
                 for (const animal of animais) {
                     const { idAnimal, nome, especie, raca, genero, porte, rga, obs } = animal
     
-                    if (existingAnimalIds.includes(idAnimal)) {
+                    if (!existingAnimalIds.includes(idAnimal)) {
                         await knex('animais').update({ status: 'Desativado' }).where({ idAnimal })
                     } else {
                         await knex('animais').insert({
