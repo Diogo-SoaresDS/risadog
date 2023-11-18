@@ -61,8 +61,8 @@ module.exports = {
                 for (const animal of animais) {
                     const { idAnimal, nome, especie, raca, genero, porte, rga, obs } = animal
     
-                    if (!existingAnimalIds.includes(idAnimal)) {
-                        await knex('animais').update({ status: 'Desativado' }).where({ idAnimal })
+                    if (existingAnimalIds.includes(idAnimal)) {
+                        await knex('animais').update({ status: 'Ativo' }).where({ idAnimal })
                     } else {
                         await knex('animais').insert({
                             idAnimal,
@@ -82,6 +82,13 @@ module.exports = {
                         })
                     }
                 }
+    
+                const notMentionedAnimalIds = existingAnimalIds.filter(id => !animais.some(a => a.idAnimal === id))
+                if (notMentionedAnimalIds.length > 0) {
+                    await knex('animais').update({ status: 'Desativado' }).whereIn('idAnimal', notMentionedAnimalIds)
+                }
+            } else {
+                await knex('animais').update({ status: 'Desativado' }).where({ idCliente })
             }
 
             return res.status(201).send({ message: 'Cliente atualizado com sucesso'})
