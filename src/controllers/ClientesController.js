@@ -55,27 +55,14 @@ module.exports = {
                 uf
             }).where({ idCliente })
 
-            if(Array.isArray(animais) && animais.length > 0){
-                for(const animal of animais){
+            if (Array.isArray(animais) && animais.length > 0) {
+                const existingAnimalIds = await knex('propriedades').where({ idCliente }).pluck('idAnimal')
+    
+                for (const animal of animais) {
                     const { idAnimal, nome, especie, raca, genero, porte, rga, obs } = animal
-                    if(idAnimal){
-                        await knex('animais').update({
-                            status: 'Desativado'
-                        }).where({ idAnimal })
-                    }
-
-                    const idExiste = await knex('animais').select('idAnimal').where({ idAnimal }).first()
-                    if(idExiste && idExiste.idAnimal === idAnimal){
-                        await knex('animais').update({
-                            nome,
-                            especie,
-                            raca,
-                            genero,
-                            rga,
-                            obs,
-                            porte,
-                            status: 'Ativo'
-                        }).where({ idAnimal })
+    
+                    if (existingAnimalIds.includes(idAnimal)) {
+                        await knex('animais').update({ status: 'Desativado' }).where({ idAnimal })
                     } else {
                         await knex('animais').insert({
                             idAnimal,
@@ -88,7 +75,7 @@ module.exports = {
                             porte,
                             status: 'Ativo'
                         })
-
+    
                         await knex('propriedades').insert({
                             idCliente,
                             idAnimal
