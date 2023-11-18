@@ -58,6 +58,11 @@ module.exports = {
             if(Array.isArray(animais) && animais.length > 0){
                 for(const animal of animais){
                     const { idAnimal, nome, especie, raca, genero, porte, rga, obs } = animal
+                    if(idAnimal){
+                        await knex('animais').update({
+                            status: 'Desativado'
+                        }).where({ idAnimal })
+                    }
 
                     const idExiste = await knex('animais').select('idAnimal').where({ idAnimal }).first()
                     if(idExiste && idExiste.idAnimal === idAnimal){
@@ -134,6 +139,7 @@ module.exports = {
                 .select('animais.*')
                 .innerJoin('propriedades', 'animais.idAnimal', 'propriedades.idAnimal')
                 .where('propriedades.idCliente', idCliente)
+                .andWhere('animais.status', 'Ativo')
 
             return res.json(animais)
         } catch (error) {
