@@ -10,6 +10,53 @@ function gerarToken(params = {}){
     })
 }
 
+function somarObjAgenda(objAgenda1, objAgenda2) {
+    const resultado = [];
+    
+    for (let i = 0; i < objAgenda1.length; i++) {
+        resultado.push(Number(objAgenda1[i]) + Number(objAgenda2[i]));
+    }
+
+    return resultado.join('');
+}
+
+async function groupColaboradores(queryResult, data) {
+    const colaboradoresGrouped = {}
+
+    queryResult.forEach((colaborador) => {
+        const idColaborador = colaborador.idColaborador
+        const dataColaborador = new Date(colaborador.dataAgenda).toISOString().split('T', 1)[0];
+
+        if (!colaboradoresGrouped[idColaborador]) {
+            colaboradoresGrouped[idColaborador] = {
+                idColaborador: colaborador.idColaborador,
+                nomeColaborador: colaborador.nomeColaborador,
+                objAgenda: colaborador.objAgenda || '00000000000000000000000000000000000000000000',
+                dataAgenda: data,
+                especialidades: [],
+            }
+        } else if(dataColaborador !== data){
+            colaboradoresGrouped[idColaborador].objAgenda = '00000000000000000000000000000000000000000000'
+        } else {
+            colaboradoresGrouped[idColaborador].objAgenda = somarObjAgenda(
+                colaboradoresGrouped[idColaborador].objAgenda,
+                colaborador.objAgenda || '00000000000000000000000000000000000000000000'
+            )
+        }
+
+        if (colaborador.idEspecialidade) {
+            colaboradoresGrouped[idColaborador].especialidades.push({
+                idEspecialidade: colaborador.idEspecialidade,
+                idServicos: colaborador.idServico,
+                nomeServico: colaborador.nomeServico,
+            })
+        }
+    })
+
+    return Object.values(colaboradoresGrouped)
+}
+
+
 const colaboradorSchema = Yup.object().shape({
     email: Yup.string().required('Email obrigatório'),
     senha: Yup.string().required('Senha Obrigatório')
@@ -178,30 +225,10 @@ module.exports = {
                 .leftJoin('solicitacoes_de_servicos', 'solicitacoes_de_servicos.idEspecialidade', 'especialidades.idEspecialidade')
                 .leftJoin('execucoes', 'execucoes.idEspecialidade', 'especialidades.idEspecialidade')
                 .leftJoin('servicos', 'servicos.idServicos', 'especialidades.idServicos')
-
-            if (data) query.where('agendas.data', data)
-            const colaboradoresGrouped = {}
+                
+            if (data) query.where('solicitacoes_de_servicos.data', data)
             const colaboradoresData = await query
-    
-            colaboradoresData.forEach((colaborador) => {
-                if (!colaboradoresGrouped[colaborador.idColaborador]) {
-                    colaborador.dataAgenda = new Date(colaborador.dataAgenda).toISOString().split('T', 1)[0]
-                    colaboradoresGrouped[colaborador.idColaborador] = {
-                        idColaborador: colaborador.idColaborador,
-                        nomeColaborador: colaborador.nomeColaborador,
-                        objAgenda: colaborador.objAgenda || '00000000000000000000000000000000000000000000',
-                        dataAgenda: colaborador.dataAgenda,
-                        especialidades: [],
-                    }
-                }
-                if (colaborador.idEspecialidade) {
-                    colaboradoresGrouped[colaborador.idColaborador].especialidades.push({
-                        idEspecialidade: colaborador.idEspecialidade,
-                        idServicos: colaborador.idServico,
-                        nomeServico: colaborador.nomeServico,
-                    })
-                }
-            });
+            const colaboradoresArray = await groupColaboradores(colaboradoresData, data)
 
             const queryVazia = knex('colaboradores')
                 .select(
@@ -219,28 +246,8 @@ module.exports = {
                 .leftJoin('servicos', 'servicos.idServicos', 'especialidades.idServicos')
                 .where('solicitacoes_de_servicos.data', null)
 
-                const colaboradoresGroupedZeros = {}
-                const colaboradoresDataZeros = await queryVazia
-        
-                colaboradoresDataZeros.forEach((colaborador) => {
-                    if (!colaboradoresGroupedZeros[colaborador.idColaborador]) {
-                        colaborador.dataAgenda = new Date(colaborador.dataAgenda).toISOString().split('T', 1)[0];
-                        colaboradoresGroupedZeros[colaborador.idColaborador] = {
-                            idColaborador: colaborador.idColaborador,
-                            nomeColaborador: colaborador.nomeColaborador,
-                            objAgenda: colaborador.objAgenda || '00000000000000000000000000000000000000000000',
-                            dataAgenda: data,
-                            especialidades: [],
-                        }
-                    }
-                    if (colaborador.idEspecialidade) {
-                        colaboradoresGroupedZeros[colaborador.idColaborador].especialidades.push({
-                            idEspecialidade: colaborador.idEspecialidade,
-                            idServicos: colaborador.idServico,
-                            nomeServico: colaborador.nomeServico,
-                        })
-                    }
-                })
+            const colaboradoresDataZeros = await queryVazia
+            const colaboradoresArrayZeros = await groupColaboradores(colaboradoresDataZeros, data)
             
             const algumColaboradorComDataPassada = colaboradoresData.some((colaborador) => {
                 const dataAgenda = colaborador.dataAgenda ? new Date(colaborador.dataAgenda).toISOString().split('T', 1)[0] : null
@@ -263,35 +270,14 @@ module.exports = {
                 .leftJoin('execucoes', 'execucoes.idEspecialidade', 'especialidades.idEspecialidade')
                 .leftJoin('servicos', 'servicos.idServicos', 'especialidades.idServicos')
 
-                const colaboradoresGroupedTodos = {};
                 const colaboradoresDataTodos = await todos
-        
-                colaboradoresDataTodos.forEach((colaborador) => {
-                    if (!colaboradoresGroupedTodos[colaborador.idColaborador]) {
-                        colaborador.dataAgenda = new Date(colaborador.dataAgenda).toISOString().split('T', 1)[0];
-                        colaboradoresGroupedTodos[colaborador.idColaborador] = {
-                            idColaborador: colaborador.idColaborador,
-                            nomeColaborador: colaborador.nomeColaborador,
-                            objAgenda: colaborador.objAgenda || '00000000000000000000000000000000000000000000',
-                            dataAgenda: data,
-                            especialidades: [],
-                        }
-                    }
-                    if (colaborador.idEspecialidade) {
-                        colaboradoresGroupedTodos[colaborador.idColaborador].especialidades.push({
-                            idEspecialidade: colaborador.idEspecialidade,
-                            idServicos: colaborador.idServico,
-                            nomeServico: colaborador.nomeServico,
-                        })
-                    }
-                })
+                const colaboradoresArrayTodos = await groupColaboradores(colaboradoresDataTodos, data)
 
-                const colaboradoresArray = Object.values(colaboradoresGroupedTodos)    
-                return res.json({ colaboradores: colaboradoresArray })
+                return res.json({ colaboradores: colaboradoresArrayTodos })
             }
 
-            const colaboradoresArray = Object.values(colaboradoresGrouped).concat(Object.values(colaboradoresGroupedZeros));    
-            return res.json({ colaboradores: colaboradoresArray })
+            const colaboradores = Object.values(colaboradoresArray).concat(Object.values(colaboradoresArrayZeros));
+            return res.json({ colaboradores })
         } catch(error){
             next(error)
         }
