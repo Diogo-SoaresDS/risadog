@@ -162,11 +162,11 @@ module.exports = {
         }
     },
 
-    async solicitacaoCreate(req, res, next){
-        const { idCliente, idAnimal, idEspecialidade, data, horaInicio, horaTermino, preco, desconto, execucoes } = req.body
-        
+    async solicitacaoCreate(req, res, next) {
+        const { idCliente, idAnimal, data, horaInicio, horaTermino, preco, desconto, idEspecialidade, execucoes } = req.body;
+    
         try {
-            await knex('solicitacao_de_servicos').insert({
+            const [idSolicitacao] = await knex('solicitacoes_de_servicos').insert({
                 idCliente,
                 idAnimal,
                 idEspecialidade,
@@ -177,31 +177,37 @@ module.exports = {
                 desconto,
                 status: 'Pendente'
             })
+    
+            for (const execucao of execucoes) {
+                const { idServico, idExecucao, idColaborador, idEspecialidade, agendaExecucao, adicional, preco, total } = execucao;
 
-            const { idServicos, idEspecialidadeOrca, idColaborador, nomeColaborador, agendaExecucao, adicional } = execucoes
+                const [idItemSolicitacao] = await knex('item_solicitacao').insert({
+                    idServicos: idServico,
+                    idSolicitacao,
+                    preco,
+                    adicional
+                })
 
-            const [idItemSolicitacao] = await knex('item_solicitacao').insert({
-                idServicos,
-                adicional
-            })
-
-            await knex('execucoes').insert({
-                idItemSolicitacao,
-                idEspecialidade: idEspecialidadeOrca,
-                agenda: agendaExecucao
-            })
-            
-            return res.status(201).send({ message: 'Solicitação criada com sucesso' })
-        } catch(error){
-            next(error)
+                await knex('execucoes').insert({
+                    idExecucao,
+                    idItemSolicitacao,
+                    idEspecialidade,
+                    agenda: agendaExecucao
+                })
+            }
+    
+            return res.status(201).send({ message: 'Solicitação criada com sucesso' });
+        } catch (error) {
+            console.error(error);
+            next(error);
         }
-    },
+    },    
 
     async solicitacaoUpdate(req, res, next){
         try {
             const { idSolicitacao, idCliente, idAnimal, idEspecialidade, data, horaInicio, horaTermino, preco, desconto, execucoes } = req.body
 
-            await knex('solicitacao_de_servicos')
+            await knex('solicitacoes_de_servicos')
                 .where({ idSolicitacao }).update({
                 idCliente,
                 idAnimal,
