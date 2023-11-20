@@ -168,16 +168,17 @@ module.exports = {
                 .select(
                     'colaboradores.idColaborador as idColaborador',
                     'colaboradores.nome as nomeColaborador',
-                    'agendas.objAgenda as objAgenda',
-                    'agendas.data as dataAgenda',
+                    'execucoes.agenda as objAgenda',
+                    'solicitacoes_de_servicos.data as dataAgenda',
                     'especialidades.idEspecialidade as idEspecialidade',
                     'especialidades.idServicos as idServico',
                     'servicos.nome as nomeServico'
                 )
-                .leftJoin('agendas', 'agendas.idColaborador', 'colaboradores.idColaborador')
                 .leftJoin('especialidades', 'especialidades.idColaborador', 'colaboradores.idColaborador')
+                .leftJoin('solicitacoes_de_servicos', 'solicitacoes_de_servicos.idEspecialidade', 'especialidades.idEspecialidade')
+                .leftJoin('execucoes', 'execucoes.idEspecialidade', 'especialidades.idEspecialidade')
                 .leftJoin('servicos', 'servicos.idServicos', 'especialidades.idServicos')
-    
+
             if (data) query.where('agendas.data', data)
             const colaboradoresGrouped = {}
             const colaboradoresData = await query
@@ -206,16 +207,17 @@ module.exports = {
                 .select(
                     'colaboradores.idColaborador as idColaborador',
                     'colaboradores.nome as nomeColaborador',
-                    'agendas.objAgenda as objAgenda',
-                    'agendas.data as dataAgenda',
+                    'execucoes.agenda as objAgenda',
+                    'solicitacoes_de_servicos.data as dataAgenda',
                     'especialidades.idEspecialidade as idEspecialidade',
                     'especialidades.idServicos as idServico',
                     'servicos.nome as nomeServico'
                 )
-                .leftJoin('agendas', 'agendas.idColaborador', 'colaboradores.idColaborador')
                 .leftJoin('especialidades', 'especialidades.idColaborador', 'colaboradores.idColaborador')
+                .leftJoin('solicitacoes_de_servicos', 'solicitacoes_de_servicos.idEspecialidade', 'especialidades.idEspecialidade')
+                .leftJoin('execucoes', 'execucoes.idEspecialidade', 'especialidades.idEspecialidade')
                 .leftJoin('servicos', 'servicos.idServicos', 'especialidades.idServicos')
-                .where('agendas.data', null)
+                .where('solicitacoes_de_servicos.data', null)
 
                 const colaboradoresGroupedZeros = {}
                 const colaboradoresDataZeros = await queryVazia
@@ -250,14 +252,15 @@ module.exports = {
                 .select(
                     'colaboradores.idColaborador as idColaborador',
                     'colaboradores.nome as nomeColaborador',
-                    'agendas.objAgenda as objAgenda',
-                    'agendas.data as dataAgenda',
+                    'execucoes.agenda as objAgenda',
+                    'solicitacoes_de_servicos.data as dataAgenda',
                     'especialidades.idEspecialidade as idEspecialidade',
                     'especialidades.idServicos as idServico',
                     'servicos.nome as nomeServico'
                 )
-                .leftJoin('agendas', 'agendas.idColaborador', 'colaboradores.idColaborador')
                 .leftJoin('especialidades', 'especialidades.idColaborador', 'colaboradores.idColaborador')
+                .leftJoin('solicitacoes_de_servicos', 'solicitacoes_de_servicos.idEspecialidade', 'especialidades.idEspecialidade')
+                .leftJoin('execucoes', 'execucoes.idEspecialidade', 'especialidades.idEspecialidade')
                 .leftJoin('servicos', 'servicos.idServicos', 'especialidades.idServicos')
 
                 const colaboradoresGroupedTodos = {};
