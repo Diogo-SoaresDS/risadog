@@ -170,8 +170,9 @@ module.exports = {
                 idCliente,
                 idAnimal,
                 idEspecialidade,
-                inicio: `${data} ${horaInicio}`,
-                termino: `${data} ${horaTermino}`,
+                inicio: horaInicio,
+                termino: horaTermino,
+                data,
                 preco,
                 desconto,
                 status: 'Pendente'
@@ -205,8 +206,9 @@ module.exports = {
                 idCliente,
                 idAnimal,
                 idEspecialidade,
-                inicio: `${data} ${horaInicio}`,
-                termino: `${data} ${horaTermino}`,
+                inicio: horaInicio,
+                termino: horaTermino,
+                data,
                 preco,
                 desconto,
             })
@@ -257,7 +259,7 @@ module.exports = {
 
     async execucaoRead(req, res, next){
         try {
-            const execucoes = await knex('servicos')
+            const execucoes = await knex('solicitacao_de_servicos')
                 .select(
                     ''
                 )
