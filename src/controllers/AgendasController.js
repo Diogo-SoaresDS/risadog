@@ -180,7 +180,6 @@ module.exports = {
                 const agendasOcupadas = horariosOcupados.map((item) => item.agenda);
     
                 if (agendasOcupadas.some((ocupada) => ocupada.includes(agendaExecucao))) {
-                    console.log(agendasOcupadas)
                     return res.status(400).json({ message: 'Os horários selecionados não estão disponíveis. Por favor, escolha outro horário' });
                 }
             }
