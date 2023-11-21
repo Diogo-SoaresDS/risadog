@@ -163,9 +163,28 @@ module.exports = {
     },
 
     async solicitacaoCreate(req, res, next) {
-        const { idCliente, idAnimal, data, horaInicio, horaTermino, preco, desconto, idEspecialidade, execucoes } = req.body;
+        const { idCliente, idAnimal, data, horaInicio, horaTermino, preco, desconto, idEspecialidade, execucoes } = req.body
     
         try {
+            for (const execucao of execucoes) {
+                const { idColaborador, idEspecialidade, agendaExecucao } = execucao;
+    
+                const horariosOcupados = await knex('execucoes')
+                    .select('execucoes.agenda')
+                    .innerJoin('especialidades', 'especialidades.idEspecialidade', 'execucoes.idEspecialidade')
+                    .innerJoin('solicitacoes_de_servicos', 'especialidades.idEspecialidade', 'solicitacoes_de_servicos.idEspecialidade')
+                    .where('especialidades.idColaborador', idColaborador)
+                    .andWhere('solicitacoes_de_servicos.data', new Date(data).toISOString().split('T', 1)[0])
+                    .andWhere('execucoes.idEspecialidade', idEspecialidade);
+    
+                const agendasOcupadas = horariosOcupados.map((item) => item.agenda);
+    
+                if (agendasOcupadas.some((ocupada) => ocupada.includes(agendaExecucao))) {
+                    console.log(agendasOcupadas)
+                    return res.status(400).json({ message: 'Os horários selecionados não estão disponíveis. Por favor, escolha outro horário' });
+                }
+            }
+
             const [idSolicitacao] = await knex('solicitacoes_de_servicos').insert({
                 idCliente,
                 idAnimal,
@@ -179,7 +198,7 @@ module.exports = {
             })
     
             for (const execucao of execucoes) {
-                const { idServico, idExecucao, idColaborador, idEspecialidade, agendaExecucao, adicional, preco, total } = execucao;
+                const { idServico, idExecucao, idColaborador, idEspecialidade, agendaExecucao, adicional, preco, total } = execucao
 
                 const [idItemSolicitacao] = await knex('item_solicitacao').insert({
                     idServicos: idServico,
@@ -196,10 +215,10 @@ module.exports = {
                 })
             }
     
-            return res.status(201).send({ message: 'Solicitação criada com sucesso' });
+            return res.status(201).send({ message: 'Solicitação criada com sucesso' })
         } catch (error) {
-            console.error(error);
-            next(error);
+            console.error(error)
+            next(error)
         }
     },    
 
