@@ -40,7 +40,7 @@ routes.delete('/agendas/:id', agendasController.delete)
 routes.get('/agendas/filter', agendasController.filterDataAndStatus)
 routes.get('/solicitacao', agendasController.execucaoRead)
 routes.post('/solicitacao', agendasController.solicitacaoCreate)
-routes.put('/solicitacao', agendasController.solicitacaoUpdate)
+routes.put('/solicitacao/:idSolicitacao', agendasController.solicitacaoUpdate)
 routes.delete('/solicitacao/:idSolicitacao', agendasController.solicitacaoDelete)
 
 // Execuções

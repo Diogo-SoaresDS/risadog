@@ -222,41 +222,43 @@ module.exports = {
         }
     },    
 
-    async solicitacaoUpdate(req, res, next){
+    async solicitacaoUpdate(req, res, next) {
         try {
-            const { idSolicitacao, idCliente, idAnimal, idEspecialidade, data, horaInicio, horaTermino, preco, desconto, execucoes } = req.body
-
-            await knex('solicitacoes_de_servicos')
-                .where({ idSolicitacao }).update({
+            const { idCliente, idAnimal, data, horaInicio, horaTermino, preco, desconto, idColaborador, execucoes } = req.body
+            const { idSolicitacao } = req.params
+    
+            await knex('solicitacoes_de_servicos').where({ idSolicitacao }).update({
                 idCliente,
                 idAnimal,
-                idEspecialidade,
+                idColaborador,
                 inicio: horaInicio,
                 termino: horaTermino,
                 data,
                 preco,
                 desconto,
+                status: 'Pendente'
             })
-
+    
             for (const execucao of execucoes) {
-                await knex('execucoes')
-                    .where({ idExecucao: execucao.idExecucao }).update({
-                        idEspecialidade: execucao.idEspecialidade,
-                        agenda: execucao.agendaExecucao,
+                const { idServico, idExecucao, idColaborador, idEspecialidade, agendaExecucao, adicional, preco, total } = execucao;
+    
+                await knex('item_solicitacao').where({ idSolicitacao }).update({
+                        idServicos: idServico,
+                        preco,
+                        adicional
                 })
-
-                await knex('item_solicitacao')
-                    .where({ idItemSolicitacao: execucao.idItemSolicitacao }).update({
-                        idServicos: execucao.idServicos,
-                        adicional: execucao.adicional,
+    
+                await knex('execucoes').where({ idExecucao }).update({
+                        idEspecialidade,
+                        agenda: agendaExecucao
                 })
             }
-
-            return res.send({ message: 'Solicitação atualizada com sucesso' });
-        } catch(error){
+    
+            return res.send({ message: 'Solicitação atualizada com sucesso' })
+        } catch (error) {
             next(error)
         }
-    },
+    },    
 
     async solicitacaoDelete(req, res, next){
         try {
