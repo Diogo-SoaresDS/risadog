@@ -163,7 +163,7 @@ module.exports = {
     },
 
     async solicitacaoCreate(req, res, next) {
-        const { idCliente, idAnimal, data, horaInicio, horaTermino, preco, desconto, idEspecialidade, execucoes } = req.body
+        const { idCliente, idAnimal, data, horaInicio, horaTermino, preco, desconto, idColaborador, execucoes } = req.body
     
         try {
             for (const execucao of execucoes) {
@@ -187,7 +187,7 @@ module.exports = {
             const [idSolicitacao] = await knex('solicitacoes_de_servicos').insert({
                 idCliente,
                 idAnimal,
-                idEspecialidade,
+                idColaborador,
                 inicio: horaInicio,
                 termino: horaTermino,
                 data,
