@@ -222,7 +222,7 @@ module.exports = {
                     'servicos.nome as nomeServico'
                 )
                 .leftJoin('especialidades', 'especialidades.idColaborador', 'colaboradores.idColaborador')
-                .leftJoin('solicitacoes_de_servicos', 'solicitacoes_de_servicos.idEspecialidade', 'especialidades.idEspecialidade')
+                .leftJoin('solicitacoes_de_servicos', 'solicitacoes_de_servicos.idColaborador', 'colaboradores.idColaborador')
                 .leftJoin('execucoes', 'execucoes.idEspecialidade', 'especialidades.idEspecialidade')
                 .leftJoin('servicos', 'servicos.idServicos', 'especialidades.idServicos')
                 
@@ -241,7 +241,7 @@ module.exports = {
                     'servicos.nome as nomeServico'
                 )
                 .leftJoin('especialidades', 'especialidades.idColaborador', 'colaboradores.idColaborador')
-                .leftJoin('solicitacoes_de_servicos', 'solicitacoes_de_servicos.idEspecialidade', 'especialidades.idEspecialidade')
+                .leftJoin('solicitacoes_de_servicos', 'solicitacoes_de_servicos.idColaborador', 'colaboradores.idColaborador')
                 .leftJoin('execucoes', 'execucoes.idEspecialidade', 'especialidades.idEspecialidade')
                 .leftJoin('servicos', 'servicos.idServicos', 'especialidades.idServicos')
                 .where('solicitacoes_de_servicos.data', null)
@@ -266,7 +266,7 @@ module.exports = {
                     'servicos.nome as nomeServico'
                 )
                 .leftJoin('especialidades', 'especialidades.idColaborador', 'colaboradores.idColaborador')
-                .leftJoin('solicitacoes_de_servicos', 'solicitacoes_de_servicos.idEspecialidade', 'especialidades.idEspecialidade')
+                .leftJoin('solicitacoes_de_servicos', 'solicitacoes_de_servicos.idColaborador', 'colaboradores.idColaborador')
                 .leftJoin('execucoes', 'execucoes.idEspecialidade', 'especialidades.idEspecialidade')
                 .leftJoin('servicos', 'servicos.idServicos', 'especialidades.idServicos')
 
