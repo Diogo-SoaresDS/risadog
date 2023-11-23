@@ -172,7 +172,8 @@ module.exports = {
                 const horariosOcupados = await knex('execucoes')
                     .select('execucoes.agenda')
                     .innerJoin('especialidades', 'especialidades.idEspecialidade', 'execucoes.idEspecialidade')
-                    .innerJoin('solicitacoes_de_servicos', 'especialidades.idEspecialidade', 'solicitacoes_de_servicos.idEspecialidade')
+                    .innerJoin('item_solicitacao', 'item_solicitacao.idItemSolicitacao', 'execucoes.idItemSolicitacao')
+                    .innerJoin('solicitacoes_de_servicos', 'solicitacoes_de_servicos.idSolicitacao', 'item_solicitacao.idSolicitacao')
                     .where('especialidades.idColaborador', idColaborador)
                     .andWhere('solicitacoes_de_servicos.data', new Date(data).toISOString().split('T', 1)[0])
                     .andWhere('execucoes.idEspecialidade', idEspecialidade);
