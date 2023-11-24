@@ -44,12 +44,16 @@ async function groupColaboradores(queryResult, data) {
             )
         }
 
-        if (colaborador.idEspecialidade) {
+        const especialidadeExiste = colaboradoresGrouped[idColaborador].especialidades.some(
+            (esp) => esp.idEspecialidade === colaborador.idEspecialidade
+        );
+
+        if (!especialidadeExiste && colaborador.idEspecialidade) {
             colaboradoresGrouped[idColaborador].especialidades.push({
                 idEspecialidade: colaborador.idEspecialidade,
                 idServicos: colaborador.idServico,
                 nomeServico: colaborador.nomeServico,
-            })
+            });
         }
     })
 
