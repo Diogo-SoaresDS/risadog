@@ -1,8 +1,13 @@
 const knex = require('../database')
 
-function somarObjAgenda(objAgenda1, objAgenda2) {
-    const resultado = BigInt(`0b${objAgenda1}`) | BigInt(`0b${objAgenda2}`)
-    return resultado.toString(2)
+function somarObjAgendas(agendas) {
+    let resultado = BigInt(0);
+    
+    agendas.forEach((agenda) => {
+        resultado |= BigInt(`0b${agenda}`)
+    })
+
+    return resultado.toString(2).padStart(44, '0')
 }
 
 module.exports = {
@@ -183,12 +188,8 @@ module.exports = {
                     .andWhere('solicitacoes_de_servicos.data', new Date(data).toISOString().split('T', 1)[0])
                     .andWhere('execucoes.idEspecialidade', idEspecialidade)
     
-                let resultado = '00000000000000000000000000000000000000000000'
-                for (const valor of horariosOcupados) {
-                    resultado = somarObjAgenda(resultado, valor.agenda)
-                }
-
-                const existeValorIgual = [...resultado].some((bit, index) => bit === agendaExecucao[index])
+                const resultadoSoma = somarObjAgendas(horariosOcupados.map(item => item.agenda))
+                const existeValorIgual = [...resultadoSoma].some((bit, index) => bit === '1' && agendaExecucao[index] === '1')
                 if (existeValorIgual) {
                     return res.status(400).json({ message: 'Os horários selecionados não estão disponíveis. Por favor, escolha outro horário' })
                 }
@@ -293,16 +294,44 @@ module.exports = {
         }
     },
 
-    async execucaoRead(req, res, next){
+    async execucaoRead(req, res, next) {
         try {
-            const execucoes = await knex('solicitacao_de_servicos')
+            const execucoes = await knex('solicitacoes_de_servicos')
                 .select(
-                    ''
+                    'solicitacoes_de_servicos.data as data',
+                    'solicitacoes_de_servicos.inicio as horaInicio',
+                    'solicitacoes_de_servicos.termino as horaTermino',
+                    'solicitacoes_de_servicos.preco as preco',
+                    'solicitacoes_de_servicos.desconto as desconto',
+                    'solicitacoes_de_servicos.status as status',
+                    'solicitacoes_de_servicos.idColaborador as idColaborador',
+                    'solicitacoes_de_servicos.idCliente as idCliente',
+                    'solicitacoes_de_servicos.idAnimal as idAnimal'
+                    // 'item_solicitacao.idServico as idServico',
+                    // 'servicos.nome as nomeServico',
+                    // 'servicos.preco as precoServico',
+                    // 'servicos.adicional as adicionalServico',
+                    // 'execucoes.idExecucao as idExecucao',
+                    // 'colaboradores.nome as nomeColaborador',
+                    // 'execucoes.idEspecialidade as idEspecialidade',
+                    // 'execucoes.agenda as agendaExecucao',
+                    // 'item_solicitacao.adicional as adicional',
+                    // 'clientes.nome as nomeCliente',
+                    // 'animais.nome as nomeAnimal',
+                    // 'animais.especie as especie',
+                    // 'animais.porte as porte'
                 )
-        
-            return res.send({ execucoes })
-        } catch(error){
+                // .innerJoin('item_solicitacao', 'solicitacoes_de_servicos.idSolicitacao', 'item_solicitacao.idSolicitacao')
+                // .innerJoin('servicos', 'item_solicitacao.idServicos', 'servicos.idServicos')
+                // .innerJoin('execucoes', 'item_solicitacao.idItemSolicitacao', 'execucoes.idItemSolicitacao')
+                // .innerJoin('colaboradores', 'solicitacoes_de_servicos.idColaborador', 'colaboradores.idColaborador')
+                // .innerJoin('clientes', 'solicitacoes_de_servicos.idCliente', 'clientes.idCliente')
+                // .innerJoin('animais', 'solicitacoes_de_servicos.idAnimal', 'animais.idAnimal')
+
+            const resultArray = Object.values(execucoes)
+            return res.send(resultArray)
+        } catch (error) {
             next(error)
         }
-    }
+    }    
 }
