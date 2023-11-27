@@ -11,13 +11,8 @@ function gerarToken(params = {}){
 }
 
 function somarObjAgenda(objAgenda1, objAgenda2) {
-    const resultado = [];
-    
-    for (let i = 0; i < objAgenda1.length; i++) {
-        resultado.push(Number(objAgenda1[i]) + Number(objAgenda2[i]));
-    }
-
-    return resultado.join('');
+    const resultado = BigInt(`0b${objAgenda1}`) | BigInt(`0b${objAgenda2}`)
+    return resultado.toString(2)
 }
 
 async function groupColaboradores(queryResult, data) {
@@ -25,7 +20,7 @@ async function groupColaboradores(queryResult, data) {
 
     queryResult.forEach((colaborador) => {
         const idColaborador = colaborador.idColaborador
-        const dataColaborador = new Date(colaborador.dataAgenda).toISOString().split('T', 1)[0];
+        const dataColaborador = new Date(colaborador.dataAgenda).toISOString().split('T', 1)[0]
 
         if (!colaboradoresGrouped[idColaborador]) {
             colaboradoresGrouped[idColaborador] = {
@@ -35,7 +30,7 @@ async function groupColaboradores(queryResult, data) {
                 dataAgenda: data,
                 especialidades: [],
             }
-        } else if(dataColaborador !== data){
+        } else if (dataColaborador !== data) {
             colaboradoresGrouped[idColaborador].objAgenda = '00000000000000000000000000000000000000000000'
         } else {
             colaboradoresGrouped[idColaborador].objAgenda = somarObjAgenda(
@@ -46,14 +41,14 @@ async function groupColaboradores(queryResult, data) {
 
         const especialidadeExiste = colaboradoresGrouped[idColaborador].especialidades.some(
             (esp) => esp.idEspecialidade === colaborador.idEspecialidade
-        );
+        )
 
         if (!especialidadeExiste && colaborador.idEspecialidade) {
             colaboradoresGrouped[idColaborador].especialidades.push({
                 idEspecialidade: colaborador.idEspecialidade,
                 idServicos: colaborador.idServico,
                 nomeServico: colaborador.nomeServico,
-            });
+            })
         }
     })
 

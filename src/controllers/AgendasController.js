@@ -1,5 +1,10 @@
 const knex = require('../database')
 
+function somarObjAgenda(objAgenda1, objAgenda2) {
+    const resultado = BigInt(`0b${objAgenda1}`) | BigInt(`0b${objAgenda2}`)
+    return resultado.toString(2)
+}
+
 module.exports = {
     async index(req, res, next) {
         try {
@@ -176,12 +181,16 @@ module.exports = {
                     .innerJoin('solicitacoes_de_servicos', 'solicitacoes_de_servicos.idSolicitacao', 'item_solicitacao.idSolicitacao')
                     .where('especialidades.idColaborador', idColaborador)
                     .andWhere('solicitacoes_de_servicos.data', new Date(data).toISOString().split('T', 1)[0])
-                    .andWhere('execucoes.idEspecialidade', idEspecialidade);
+                    .andWhere('execucoes.idEspecialidade', idEspecialidade)
     
-                const agendasOcupadas = horariosOcupados.map((item) => item.agenda);
-    
-                if (agendasOcupadas.some((ocupada) => ocupada.includes(agendaExecucao))) {
-                    return res.status(400).json({ message: 'Os horários selecionados não estão disponíveis. Por favor, escolha outro horário' });
+                let resultado = '00000000000000000000000000000000000000000000'
+                for (const valor of horariosOcupados) {
+                    resultado = somarObjAgenda(resultado, valor.agenda)
+                }
+
+                const existeValorIgual = [...resultado].some((bit, index) => bit === agendaExecucao[index])
+                if (existeValorIgual) {
+                    return res.status(400).json({ message: 'Os horários selecionados não estão disponíveis. Por favor, escolha outro horário' })
                 }
             }
 
