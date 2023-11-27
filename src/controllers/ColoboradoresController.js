@@ -12,18 +12,18 @@ function gerarToken(params = {}){
 
 function somarObjAgenda(objAgenda1, objAgenda2) {
     const resultado = BigInt(`0b${objAgenda1}`) | BigInt(`0b${objAgenda2}`)
-    return resultado.toString(2)
+    return resultado.toString(2).padStart(44, '0')
 }
 
 async function groupColaboradores(queryResult, data) {
     const colaboradoresGrouped = {}
 
     queryResult.forEach((colaborador) => {
-        const idColaborador = colaborador.idColaborador
+        const idEspecialidade = colaborador.idEspecialidade
         const dataColaborador = new Date(colaborador.dataAgenda).toISOString().split('T', 1)[0]
 
-        if (!colaboradoresGrouped[idColaborador]) {
-            colaboradoresGrouped[idColaborador] = {
+        if (!colaboradoresGrouped[idEspecialidade]) {
+            colaboradoresGrouped[idEspecialidade] = {
                 idColaborador: colaborador.idColaborador,
                 nomeColaborador: colaborador.nomeColaborador,
                 objAgenda: colaborador.objAgenda || '00000000000000000000000000000000000000000000',
@@ -31,20 +31,20 @@ async function groupColaboradores(queryResult, data) {
                 especialidades: [],
             }
         } else if (dataColaborador !== data) {
-            colaboradoresGrouped[idColaborador].objAgenda = '00000000000000000000000000000000000000000000'
+            colaboradoresGrouped[idEspecialidade].objAgenda = '00000000000000000000000000000000000000000000'
         } else {
-            colaboradoresGrouped[idColaborador].objAgenda = somarObjAgenda(
-                colaboradoresGrouped[idColaborador].objAgenda,
+            colaboradoresGrouped[idEspecialidade].objAgenda = somarObjAgenda(
+                colaboradoresGrouped[idEspecialidade].objAgenda,
                 colaborador.objAgenda || '00000000000000000000000000000000000000000000'
             )
         }
 
-        const especialidadeExiste = colaboradoresGrouped[idColaborador].especialidades.some(
+        const especialidadeExiste = colaboradoresGrouped[idEspecialidade].especialidades.some(
             (esp) => esp.idEspecialidade === colaborador.idEspecialidade
         )
 
         if (!especialidadeExiste && colaborador.idEspecialidade) {
-            colaboradoresGrouped[idColaborador].especialidades.push({
+            colaboradoresGrouped[idEspecialidade].especialidades.push({
                 idEspecialidade: colaborador.idEspecialidade,
                 idServicos: colaborador.idServico,
                 nomeServico: colaborador.nomeServico,

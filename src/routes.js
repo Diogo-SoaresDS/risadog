@@ -42,7 +42,7 @@ routes.get('/solicitacao', agendasController.execucaoRead)
 routes.post('/solicitacao', agendasController.solicitacaoCreate)
 routes.put('/solicitacao/:idSolicitacao', agendasController.solicitacaoUpdate)
 routes.delete('/solicitacao/:idSolicitacao', agendasController.solicitacaoDelete)
-routes.post('/execucoes', agendasController.execucaoRead)
+routes.get('/execucoes', agendasController.execucaoRead)
 
 // Serviços
 routes.get('/servicos', servicesController.index)
