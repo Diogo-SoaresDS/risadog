@@ -234,9 +234,39 @@ module.exports = {
     },    
 
     async solicitacaoUpdate(req, res, next) {
+        const { idCliente, idAnimal, data, horaInicio, horaTermino, preco, desconto, idColaborador, execucoes } = req.body
+        const { idSolicitacao } = req.params
+        
         try {
-            const { idCliente, idAnimal, data, horaInicio, horaTermino, preco, desconto, idColaborador, execucoes } = req.body
-            const { idSolicitacao } = req.params
+            for (const execucao of execucoes) {
+                const { idColaborador, idEspecialidade, agendaExecucao } = execucao;
+    
+                const horariosOcupados = await knex('execucoes')
+                    .select('execucoes.agenda')
+                    .innerJoin('especialidades', 'especialidades.idEspecialidade', 'execucoes.idEspecialidade')
+                    .innerJoin('item_solicitacao', 'item_solicitacao.idItemSolicitacao', 'execucoes.idItemSolicitacao')
+                    .innerJoin('solicitacoes_de_servicos', 'solicitacoes_de_servicos.idSolicitacao', 'item_solicitacao.idSolicitacao')
+                    .where('especialidades.idColaborador', idColaborador)
+                    .andWhere('solicitacoes_de_servicos.data', new Date(data).toISOString().split('T', 1)[0])
+                    .andWhere('execucoes.idEspecialidade', idEspecialidade)
+    
+                const resultadoSoma = somarObjAgendas(horariosOcupados.map(item => item.agenda))
+                const existeValorIgual = [...resultadoSoma].some((bit, index) => bit === '1' && agendaExecucao[index] === '1')
+                if (existeValorIgual) {
+                    return res.status(400).json({ message: 'Os horários selecionados não estão disponíveis. Por favor, escolha outro horário' })
+                }
+            }
+
+            await knex('execucoes')
+                .innerJoin('item_solicitacao', 'item_solicitacao.idItemSolicitacao', 'execucoes.idItemSolicitacao')
+                .innerJoin('solicitacoes_de_servicos', 'solicitacoes_de_servicos.idSolicitacao', 'item_solicitacao.idSolicitacao')
+                .where('solicitacoes_de_servicos.idSolicitacao', idSolicitacao)
+                .del()
+
+            await knex('item_solicitacao')
+                .innerJoin('solicitacoes_de_servicos', 'solicitacoes_de_servicos.idSolicitacao', 'item_solicitacao.idSolicitacao')
+                .where('solicitacoes_de_servicos.idSolicitacao', idSolicitacao)
+                .del()
     
             await knex('solicitacoes_de_servicos').where({ idSolicitacao }).update({
                 idCliente,
@@ -251,17 +281,21 @@ module.exports = {
             })
     
             for (const execucao of execucoes) {
-                const { idServico, idExecucao, idColaborador, idEspecialidade, agendaExecucao, adicional, preco, total } = execucao;
-    
-                await knex('item_solicitacao').where({ idSolicitacao }).update({
-                        idServicos: idServico,
-                        preco,
-                        adicional
+                const { idServico, idExecucao, idColaborador, idEspecialidade, agendaExecucao, adicional, preco, total } = execucao
+
+                const [idItemSolicitacao] = await knex('item_solicitacao').insert({
+                    idServicos: idServico,
+                    idSolicitacao,
+                    data,
+                    preco,
+                    adicional
                 })
-    
-                await knex('execucoes').where({ idExecucao }).update({
-                        idEspecialidade,
-                        agenda: agendaExecucao
+
+                await knex('execucoes').insert({
+                    idExecucao,
+                    idItemSolicitacao,
+                    idEspecialidade,
+                    agenda: agendaExecucao
                 })
             }
     
