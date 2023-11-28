@@ -300,6 +300,7 @@ module.exports = {
             const { data } = req.query
             const query = await knex('solicitacoes_de_servicos')
                 .select(
+                    'solicitacoes_de_servicos.idSolicitacao as idSolicitacao',
                     'solicitacoes_de_servicos.data as data',
                     'solicitacoes_de_servicos.inicio as horaInicio',
                     'solicitacoes_de_servicos.termino as horaTermino',
@@ -333,6 +334,7 @@ module.exports = {
                 const idSolicitacao = execucao.idSolicitacao
                 if (!solicitacoesGrouped[idSolicitacao]) {
                     solicitacoesGrouped[idSolicitacao] = {
+                        idSolicitacao: idSolicitacao,
                         data: new Date(execucao.data).toISOString().split('T', 1)[0],
                         horaInicio: execucao.horaInicio,
                         horaTermino: execucao.horaTermino,
@@ -401,7 +403,7 @@ module.exports = {
             }
         
             const resultArray = Object.values(solicitacoesGrouped)
-            return res.send(...resultArray)
+            return res.send(resultArray)
         } catch (error) {
             next(error)
         }
