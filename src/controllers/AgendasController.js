@@ -328,6 +328,7 @@ module.exports = {
                 .innerJoin('clientes', 'solicitacoes_de_servicos.idCliente', 'clientes.idCliente')
                 .innerJoin('animais', 'solicitacoes_de_servicos.idAnimal', 'animais.idAnimal')
                 .where('item_solicitacao.data', data)
+                .orderBy('solicitacoes_de_servicos.inicio', 'asc')
 
             const solicitacoesGrouped = {}
             for (const execucao of query) {
@@ -379,15 +380,15 @@ module.exports = {
                     precoServico = result ? Number(result.preco_m) : 0
                 } else {
                     const result = await knex('servicos')
-                        .select('preco_g')
+                        .select('preco_m')
                         .where('idServicos', execucao.idServico)
                         .first()
                 
-                    precoServico = result ? Number(result.preco_g) : 0;
+                    precoServico = result ? Number(result.preco_m) : 0
                 }
 
                 precoServico += Number(execucao.adicional)
-                solicitacoesGrouped[idSolicitacao].preco += precoServico
+                solicitacoesGrouped[idSolicitacao].preco += precoServico - (precoServico * Number(execucao.desconto))
                 solicitacoesGrouped[idSolicitacao].execucoes.push({
                     idServico: Number(execucao.idServico),
                     nomeServico: execucao.nomeServico,
@@ -396,7 +397,7 @@ module.exports = {
                     nomeColaborador: colaboradorInfo.nome,
                     idEspecialidade: execucao.idEspecialidade,
                     agendaExecucao: execucao.agendaExecucao,
-                    preco: Number(execucao.preco),
+                    preco: precoServico,
                     adicional: Number(execucao.adicional),
                     total: precoServico
                 })
