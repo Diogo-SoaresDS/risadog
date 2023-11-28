@@ -19,11 +19,11 @@ async function groupColaboradores(queryResult, data) {
     const colaboradoresGrouped = {}
 
     queryResult.forEach((colaborador) => {
-        const idEspecialidade = colaborador.idEspecialidade
+        const idColaborador = colaborador.idColaborador
         const dataColaborador = new Date(colaborador.dataAgenda).toISOString().split('T', 1)[0]
 
-        if (!colaboradoresGrouped[idEspecialidade]) {
-            colaboradoresGrouped[idEspecialidade] = {
+        if (!colaboradoresGrouped[idColaborador]) {
+            colaboradoresGrouped[idColaborador] = {
                 idColaborador: colaborador.idColaborador,
                 nomeColaborador: colaborador.nomeColaborador,
                 objAgenda: colaborador.objAgenda || '00000000000000000000000000000000000000000000',
@@ -31,20 +31,20 @@ async function groupColaboradores(queryResult, data) {
                 especialidades: [],
             }
         } else if (dataColaborador !== data) {
-            colaboradoresGrouped[idEspecialidade].objAgenda = '00000000000000000000000000000000000000000000'
+            colaboradoresGrouped[idColaborador].objAgenda = '00000000000000000000000000000000000000000000'
         } else {
-            colaboradoresGrouped[idEspecialidade].objAgenda = somarObjAgenda(
-                colaboradoresGrouped[idEspecialidade].objAgenda,
+            colaboradoresGrouped[idColaborador].objAgenda = somarObjAgenda(
+                colaboradoresGrouped[idColaborador].objAgenda,
                 colaborador.objAgenda || '00000000000000000000000000000000000000000000'
             )
         }
 
-        const especialidadeExiste = colaboradoresGrouped[idEspecialidade].especialidades.some(
+        const especialidadeExiste = colaboradoresGrouped[idColaborador].especialidades.some(
             (esp) => esp.idEspecialidade === colaborador.idEspecialidade
         )
 
         if (!especialidadeExiste && colaborador.idEspecialidade) {
-            colaboradoresGrouped[idEspecialidade].especialidades.push({
+            colaboradoresGrouped[idColaborador].especialidades.push({
                 idEspecialidade: colaborador.idEspecialidade,
                 idServicos: colaborador.idServico,
                 nomeServico: colaborador.nomeServico,

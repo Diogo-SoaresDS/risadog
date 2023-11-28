@@ -301,34 +301,74 @@ module.exports = {
                     'solicitacoes_de_servicos.data as data',
                     'solicitacoes_de_servicos.inicio as horaInicio',
                     'solicitacoes_de_servicos.termino as horaTermino',
-                    'solicitacoes_de_servicos.preco as preco',
                     'solicitacoes_de_servicos.desconto as desconto',
                     'solicitacoes_de_servicos.status as status',
                     'solicitacoes_de_servicos.idColaborador as idColaborador',
                     'solicitacoes_de_servicos.idCliente as idCliente',
-                    'solicitacoes_de_servicos.idAnimal as idAnimal'
-                    // 'item_solicitacao.idServico as idServico',
-                    // 'servicos.nome as nomeServico',
-                    // 'servicos.preco as precoServico',
-                    // 'servicos.adicional as adicionalServico',
-                    // 'execucoes.idExecucao as idExecucao',
-                    // 'colaboradores.nome as nomeColaborador',
-                    // 'execucoes.idEspecialidade as idEspecialidade',
-                    // 'execucoes.agenda as agendaExecucao',
-                    // 'item_solicitacao.adicional as adicional',
-                    // 'clientes.nome as nomeCliente',
-                    // 'animais.nome as nomeAnimal',
-                    // 'animais.especie as especie',
-                    // 'animais.porte as porte'
+                    'solicitacoes_de_servicos.idAnimal as idAnimal',
+                    'item_solicitacao.idServicos as idServico',
+                    'servicos.nome as nomeServico',
+                    'execucoes.idExecucao as idExecucao',
+                    'colaboradores.nome as nomeColaborador',
+                    'execucoes.idEspecialidade as idEspecialidade',
+                    'execucoes.agenda as agendaExecucao',
+                    'item_solicitacao.adicional as adicional',
+                    'item_solicitacao.preco as preco',
+                    'clientes.nome as nomeCliente',
+                    'animais.nome as nomeAnimal',
+                    'animais.especie as especie',
+                    'animais.porte as porte'
                 )
-                // .innerJoin('item_solicitacao', 'solicitacoes_de_servicos.idSolicitacao', 'item_solicitacao.idSolicitacao')
-                // .innerJoin('servicos', 'item_solicitacao.idServicos', 'servicos.idServicos')
-                // .innerJoin('execucoes', 'item_solicitacao.idItemSolicitacao', 'execucoes.idItemSolicitacao')
-                // .innerJoin('colaboradores', 'solicitacoes_de_servicos.idColaborador', 'colaboradores.idColaborador')
-                // .innerJoin('clientes', 'solicitacoes_de_servicos.idCliente', 'clientes.idCliente')
-                // .innerJoin('animais', 'solicitacoes_de_servicos.idAnimal', 'animais.idAnimal')
+                .innerJoin('item_solicitacao', 'solicitacoes_de_servicos.idSolicitacao', 'item_solicitacao.idSolicitacao')
+                .innerJoin('servicos', 'item_solicitacao.idServicos', 'servicos.idServicos')
+                .innerJoin('execucoes', 'item_solicitacao.idItemSolicitacao', 'execucoes.idItemSolicitacao')
+                .innerJoin('colaboradores', 'solicitacoes_de_servicos.idColaborador', 'colaboradores.idColaborador')
+                .innerJoin('clientes', 'solicitacoes_de_servicos.idCliente', 'clientes.idCliente')
+                .innerJoin('animais', 'solicitacoes_de_servicos.idAnimal', 'animais.idAnimal')
 
-            const resultArray = Object.values(execucoes)
+                const solicitacoesGrouped = {}
+                execucoes.forEach((execucao) => {
+                    const idSolicitacao = execucao.idSolicitacao
+        
+                    if (!solicitacoesGrouped[idSolicitacao]) {
+                        solicitacoesGrouped[idSolicitacao] = {
+                            data: execucao.data,
+                            horaInicio: execucao.horaInicio,
+                            horaTermino: execucao.horaTermino,
+                            desconto: execucao.desconto,
+                            status: execucao.status,
+                            idColaborador: execucao.idColaborador,
+                            idCliente: execucao.idCliente,
+                            idAnimal: execucao.idAnimal,
+                            execucoes: [],
+                            nomeCliente: execucao.nomeCliente,
+                            nomeAnimal: execucao.nomeAnimal,
+                            especie: execucao.especie,
+                            porte: execucao.porte,
+                        }
+                    }
+        
+                    const precoServico = 0
+                    if(execucao.porte === 'P') precoServico = execucao.porte_p
+                    if(execucao.porte === 'M') precoServico = execucao.porte_m
+                    else precoServico = execucao.porte_g
+
+                    const totalServico = precoServico + execucao.adicional
+                    solicitacoesGrouped[idSolicitacao].execucoes.push({
+                        idServico: execucao.idServicos,
+                        nomeServico: execucao.nomeServico,
+                        idExecucao: execucao.idExecucao,
+                        idColaborador: execucao.idColaborador,
+                        nomeColaborador: execucao.nomeColaborador,
+                        idEspecialidade: execucao.idEspecialidade,
+                        preco: execucao.preco,
+                        agendaExecucao: execucao.agendaExecucao,
+                        adicional: execucao.adicional,
+                        total: totalServico - execucao.adicional,
+                    })
+                })
+        
+            const resultArray = Object.values(solicitacoesGrouped)
             return res.send(resultArray)
         } catch (error) {
             next(error)
