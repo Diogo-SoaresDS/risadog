@@ -1,7 +1,7 @@
 const knex = require('../database')
 
 function somarObjAgendas(agendas) {
-    let resultado = BigInt(0);
+    let resultado = BigInt(0)
     
     agendas.forEach((agenda) => {
         resultado |= BigInt(`0b${agenda}`)
@@ -213,6 +213,7 @@ module.exports = {
                 const [idItemSolicitacao] = await knex('item_solicitacao').insert({
                     idServicos: idServico,
                     idSolicitacao,
+                    data,
                     preco,
                     adicional
                 })
@@ -296,7 +297,8 @@ module.exports = {
 
     async execucaoRead(req, res, next) {
         try {
-            const execucoes = await knex('solicitacoes_de_servicos')
+            const { data } = req.query
+            const query = await knex('solicitacoes_de_servicos')
                 .select(
                     'solicitacoes_de_servicos.data as data',
                     'solicitacoes_de_servicos.inicio as horaInicio',
@@ -309,7 +311,6 @@ module.exports = {
                     'item_solicitacao.idServicos as idServico',
                     'servicos.nome as nomeServico',
                     'execucoes.idExecucao as idExecucao',
-                    'colaboradores.nome as nomeColaborador',
                     'execucoes.idEspecialidade as idEspecialidade',
                     'execucoes.agenda as agendaExecucao',
                     'item_solicitacao.adicional as adicional',
@@ -325,51 +326,82 @@ module.exports = {
                 .innerJoin('colaboradores', 'solicitacoes_de_servicos.idColaborador', 'colaboradores.idColaborador')
                 .innerJoin('clientes', 'solicitacoes_de_servicos.idCliente', 'clientes.idCliente')
                 .innerJoin('animais', 'solicitacoes_de_servicos.idAnimal', 'animais.idAnimal')
+                .where('item_solicitacao.data', data)
 
-                const solicitacoesGrouped = {}
-                execucoes.forEach((execucao) => {
-                    const idSolicitacao = execucao.idSolicitacao
-        
-                    if (!solicitacoesGrouped[idSolicitacao]) {
-                        solicitacoesGrouped[idSolicitacao] = {
-                            data: execucao.data,
-                            horaInicio: execucao.horaInicio,
-                            horaTermino: execucao.horaTermino,
-                            desconto: execucao.desconto,
-                            status: execucao.status,
-                            idColaborador: execucao.idColaborador,
-                            idCliente: execucao.idCliente,
-                            idAnimal: execucao.idAnimal,
-                            execucoes: [],
-                            nomeCliente: execucao.nomeCliente,
-                            nomeAnimal: execucao.nomeAnimal,
-                            especie: execucao.especie,
-                            porte: execucao.porte,
-                        }
-                    }
-        
-                    const precoServico = 0
-                    if(execucao.porte === 'P') precoServico = execucao.porte_p
-                    if(execucao.porte === 'M') precoServico = execucao.porte_m
-                    else precoServico = execucao.porte_g
-
-                    const totalServico = precoServico + execucao.adicional
-                    solicitacoesGrouped[idSolicitacao].execucoes.push({
-                        idServico: execucao.idServicos,
-                        nomeServico: execucao.nomeServico,
-                        idExecucao: execucao.idExecucao,
+            const solicitacoesGrouped = {}
+            for (const execucao of query) {
+                const idSolicitacao = execucao.idSolicitacao
+                if (!solicitacoesGrouped[idSolicitacao]) {
+                    solicitacoesGrouped[idSolicitacao] = {
+                        data: new Date(execucao.data).toISOString().split('T', 1)[0],
+                        horaInicio: execucao.horaInicio,
+                        horaTermino: execucao.horaTermino,
+                        preco: 0,
+                        desconto: Number(execucao.desconto),
+                        status: execucao.status,
                         idColaborador: execucao.idColaborador,
-                        nomeColaborador: execucao.nomeColaborador,
-                        idEspecialidade: execucao.idEspecialidade,
-                        preco: execucao.preco,
-                        agendaExecucao: execucao.agendaExecucao,
-                        adicional: execucao.adicional,
-                        total: totalServico - execucao.adicional,
-                    })
+                        execucoes: [],
+                        idCliente: Number(execucao.idCliente),
+                        nomeCliente: execucao.nomeCliente,
+                        idAnimal: execucao.idAnimal,
+                        nomeAnimal: execucao.nomeAnimal,
+                        especie: execucao.especie,
+                        porte: execucao.porte
+                    }
+                }
+
+                const especialidadeInfo = await knex('especialidades')
+                    .select('idColaborador')
+                    .where('idEspecialidade', execucao.idEspecialidade)
+                    .first()
+
+                const colaboradorInfo = await knex('colaboradores')
+                    .select('nome')
+                    .where('idColaborador', especialidadeInfo.idColaborador)
+                    .first()
+
+                let precoServico = 0
+                if (execucao.porte === 'P') {
+                    const result = await knex('servicos')
+                        .select('preco_p')
+                        .where('idServicos', execucao.idServico)
+                        .first()
+                
+                    precoServico = result ? Number(result.preco_p) : 0
+                } else if (execucao.porte === 'M') {
+                    const result = await knex('servicos')
+                        .select('preco_m')
+                        .where('idServicos', execucao.idServico)
+                        .first()
+                
+                    precoServico = result ? Number(result.preco_m) : 0
+                } else {
+                    const result = await knex('servicos')
+                        .select('preco_g')
+                        .where('idServicos', execucao.idServico)
+                        .first()
+                
+                    precoServico = result ? Number(result.preco_g) : 0;
+                }
+
+                precoServico += Number(execucao.adicional)
+                solicitacoesGrouped[idSolicitacao].preco += precoServico
+                solicitacoesGrouped[idSolicitacao].execucoes.push({
+                    idServico: Number(execucao.idServico),
+                    nomeServico: execucao.nomeServico,
+                    idExecucao: execucao.idExecucao,
+                    idColaborador: especialidadeInfo.idColaborador,
+                    nomeColaborador: colaboradorInfo.nome,
+                    idEspecialidade: execucao.idEspecialidade,
+                    agendaExecucao: execucao.agendaExecucao,
+                    preco: Number(execucao.preco),
+                    adicional: Number(execucao.adicional),
+                    total: precoServico
                 })
+            }
         
             const resultArray = Object.values(solicitacoesGrouped)
-            return res.send(resultArray)
+            return res.send(...resultArray)
         } catch (error) {
             next(error)
         }
