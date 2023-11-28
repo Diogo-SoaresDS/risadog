@@ -234,7 +234,7 @@ module.exports = {
     },    
 
     async solicitacaoUpdate(req, res, next) {
-        const { idCliente, idAnimal, data, horaInicio, horaTermino, preco, desconto, idColaborador, execucoes } = req.body
+        const { idCliente, idAnimal, data, status, horaInicio, horaTermino, preco, desconto, idColaborador, execucoes } = req.body
         const { idSolicitacao } = req.params
         
         try {
@@ -258,7 +258,7 @@ module.exports = {
                 data,
                 preco,
                 desconto,
-                status: 'Pendente'
+                status
             })
     
             for (const execucao of execucoes) {
