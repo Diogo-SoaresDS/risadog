@@ -238,25 +238,6 @@ module.exports = {
         const { idSolicitacao } = req.params
         
         try {
-            for (const execucao of execucoes) {
-                const { idColaborador, idEspecialidade, agendaExecucao } = execucao;
-    
-                const horariosOcupados = await knex('execucoes')
-                    .select('execucoes.agenda')
-                    .innerJoin('especialidades', 'especialidades.idEspecialidade', 'execucoes.idEspecialidade')
-                    .innerJoin('item_solicitacao', 'item_solicitacao.idItemSolicitacao', 'execucoes.idItemSolicitacao')
-                    .innerJoin('solicitacoes_de_servicos', 'solicitacoes_de_servicos.idSolicitacao', 'item_solicitacao.idSolicitacao')
-                    .where('especialidades.idColaborador', idColaborador)
-                    .andWhere('solicitacoes_de_servicos.data', new Date(data).toISOString().split('T', 1)[0])
-                    .andWhere('execucoes.idEspecialidade', idEspecialidade)
-    
-                const resultadoSoma = somarObjAgendas(horariosOcupados.map(item => item.agenda))
-                const existeValorIgual = [...resultadoSoma].some((bit, index) => bit === '1' && agendaExecucao[index] === '1')
-                if (existeValorIgual) {
-                    return res.status(400).json({ message: 'Os horários selecionados não estão disponíveis. Por favor, escolha outro horário' })
-                }
-            }
-
             await knex('execucoes')
                 .innerJoin('item_solicitacao', 'item_solicitacao.idItemSolicitacao', 'execucoes.idItemSolicitacao')
                 .innerJoin('solicitacoes_de_servicos', 'solicitacoes_de_servicos.idSolicitacao', 'item_solicitacao.idSolicitacao')
