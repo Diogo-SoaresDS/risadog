@@ -20,6 +20,10 @@ function somarObjAgendas(agendas) {
     return resultado.toString(2).padStart(44, '0')
 }
 
+function subtrairObjAgenda(objAgenda, idSolicitacao) {
+    const objAgendaSubtraido = objAgenda.filter(item => item.idSolicitacao !== idSolicitacao)
+    return objAgendaSubtraido
+}
 
 const colaboradorSchema = Yup.object().shape({
     email: Yup.string().required('Email obrigatório'),
@@ -221,6 +225,73 @@ module.exports = {
                 if(colaborador.objAgenda && dataColaborador === data) {
                     colaboradoresGrouped[idColaborador].objAgenda.push({
                         objAgenda: colaborador.objAgenda
+                    })
+                }
+            })
+
+            Object.values(colaboradoresGrouped).forEach((colaborador) => {
+                colaborador.objAgenda = somarObjAgendas(colaborador.objAgenda)
+            })
+
+            const colaboradores = Object.values(colaboradoresGrouped)
+            return res.send({ colaboradores })
+        } catch(error){
+            next(error)
+        }
+    },
+
+    async agendaReadAltera(req, res, next) {
+        try {
+            const { data } = req.query
+            const { idSolicitacao } = req.params
+
+            const query = await knex('colaboradores')
+                .select(
+                    'colaboradores.idColaborador as idColaborador',
+                    'colaboradores.nome as nomeColaborador',
+                    'execucoes.agenda as objAgenda',
+                    'item_solicitacao.data as dataAgenda',
+                    'especialidades.idEspecialidade as idEspecialidade',
+                    'especialidades.idServicos as idServico',
+                    'servicos.nome as nomeServico'
+                )
+                .leftJoin('especialidades', 'especialidades.idColaborador', 'colaboradores.idColaborador')
+                .leftJoin('execucoes', 'execucoes.idEspecialidade', 'especialidades.idEspecialidade')
+                .leftJoin('item_solicitacao', 'item_solicitacao.idItemSolicitacao', 'execucoes.idItemSolicitacao')
+                .leftJoin('servicos', 'servicos.idServicos', 'especialidades.idServicos')
+
+            const colaboradoresGrouped = {}
+            query.forEach((colaborador) => {
+                const idColaborador = colaborador.idColaborador;
+                const dataRequisicao = new Date(data).toISOString().split('T', 1)[0]
+    
+                if (!colaboradoresGrouped[idColaborador]) {
+                    colaboradoresGrouped[idColaborador] = {
+                        idColaborador: colaborador.idColaborador,
+                        nomeColaborador: colaborador.nomeColaborador,
+                        objAgenda: [],
+                        dataAgenda: dataRequisicao,
+                        especialidades: [],
+                    }
+                }
+
+                const especialidadeExiste = colaboradoresGrouped[idColaborador].especialidades.some(
+                    (esp) => esp.idEspecialidade === colaborador.idEspecialidade
+                )
+    
+                if(!especialidadeExiste && colaborador.idEspecialidade) {
+                    colaboradoresGrouped[idColaborador].especialidades.push({
+                        idEspecialidade: colaborador.idEspecialidade,
+                        idServicos: colaborador.idServico,
+                        nomeServico: colaborador.nomeServico,
+                    })
+                }
+
+                const dataColaborador = new Date(colaborador.dataAgenda).toISOString().split('T', 1)[0]
+                if (colaborador.objAgenda && dataColaborador === data) {
+                    const objAgendaSubtraido = subtrairObjAgenda(colaborador.objAgenda, idSolicitacao);
+                    colaboradoresGrouped[idColaborador].objAgenda.push({
+                        objAgenda: objAgendaSubtraido
                     })
                 }
             })

@@ -403,7 +403,9 @@ module.exports = {
                 }
 
                 precoServico += Number(execucao.adicional)
-                solicitacoesGrouped[idSolicitacao].preco += precoServico - (precoServico * Number(execucao.desconto))
+                let precoComDesconto = precoServico - (precoServico * Number(execucao.desconto)) 
+                if(precoComDesconto < 0) precoComDesconto *= -1
+                solicitacoesGrouped[idSolicitacao].preco += Number(precoComDesconto.toFixed(2))
                 solicitacoesGrouped[idSolicitacao].execucoes.push({
                     idServico: Number(execucao.idServico),
                     nomeServico: execucao.nomeServico,
@@ -423,5 +425,5 @@ module.exports = {
         } catch (error) {
             next(error)
         }
-    }    
+    }
 }
