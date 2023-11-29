@@ -188,6 +188,7 @@ module.exports = {
                 .leftJoin('especialidades', 'especialidades.idColaborador', 'colaboradores.idColaborador')
                 .leftJoin('execucoes', 'execucoes.idEspecialidade', 'especialidades.idEspecialidade')
                 .leftJoin('item_solicitacao', 'item_solicitacao.idItemSolicitacao', 'execucoes.idItemSolicitacao')
+                .leftJoin('solicitacoes_de_servicos', 'solicitacoes_de_servicos.idSolicitacao', 'item_solicitacao.idSolicitacao')
                 .leftJoin('servicos', 'servicos.idServicos', 'especialidades.idServicos')
 
             const colaboradoresGrouped = {}
@@ -218,7 +219,7 @@ module.exports = {
                 }
 
                 const dataColaborador = new Date(colaborador.dataAgenda).toISOString().split('T', 1)[0]
-                if(colaborador.objAgenda && dataColaborador === data) {
+                if(colaborador.objAgenda && dataColaborador === data && colaborador.status !== 'Cancelado') {
                     colaboradoresGrouped[idColaborador].objAgenda.push({
                         objAgenda: colaborador.objAgenda
                     })
@@ -248,6 +249,7 @@ module.exports = {
                     'execucoes.agenda as objAgenda',
                     'item_solicitacao.data as dataAgenda',
                     'item_solicitacao.idSolicitacao as idSolicitacao',
+                    'solicitacoes_de_servicos.status as status',
                     'especialidades.idEspecialidade as idEspecialidade',
                     'especialidades.idServicos as idServico',
                     'servicos.nome as nomeServico'
@@ -255,6 +257,7 @@ module.exports = {
                 .leftJoin('especialidades', 'especialidades.idColaborador', 'colaboradores.idColaborador')
                 .leftJoin('execucoes', 'execucoes.idEspecialidade', 'especialidades.idEspecialidade')
                 .leftJoin('item_solicitacao', 'item_solicitacao.idItemSolicitacao', 'execucoes.idItemSolicitacao')
+                .leftJoin('solicitacoes_de_servicos', 'solicitacoes_de_servicos.idSolicitacao', 'item_solicitacao.idSolicitacao')
                 .leftJoin('servicos', 'servicos.idServicos', 'especialidades.idServicos')
 
             const colaboradoresGrouped = {}
@@ -285,7 +288,9 @@ module.exports = {
                 }
 
                 const dataColaborador = new Date(colaborador.dataAgenda).toISOString().split('T', 1)[0]
-                if(colaborador.objAgenda && dataColaborador === data && colaborador.idSolicitacao !== Number(idSolicitacao)) {
+                if(colaborador.objAgenda && dataColaborador === data 
+                    && colaborador.idSolicitacao !== Number(idSolicitacao)
+                    && colaborador.status !== 'Cancelado') {
                     colaboradoresGrouped[idColaborador].objAgenda.push({
                         objAgenda: colaborador.objAgenda
                     })
