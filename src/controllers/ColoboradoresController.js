@@ -20,10 +20,6 @@ function somarObjAgendas(agendas) {
     return resultado.toString(2).padStart(44, '0')
 }
 
-function subtrairObjAgenda(objAgenda, idSolicitacao) {
-    const objAgendaSubtraido = objAgenda.filter(item => item.idSolicitacao !== idSolicitacao)
-    return objAgendaSubtraido
-}
 
 const colaboradorSchema = Yup.object().shape({
     email: Yup.string().required('Email obrigatório'),
@@ -244,13 +240,14 @@ module.exports = {
         try {
             const { data } = req.query
             const { idSolicitacao } = req.params
-
+            
             const query = await knex('colaboradores')
                 .select(
                     'colaboradores.idColaborador as idColaborador',
                     'colaboradores.nome as nomeColaborador',
                     'execucoes.agenda as objAgenda',
                     'item_solicitacao.data as dataAgenda',
+                    'item_solicitacao.idSolicitacao as idSolicitacao',
                     'especialidades.idEspecialidade as idEspecialidade',
                     'especialidades.idServicos as idServico',
                     'servicos.nome as nomeServico'
@@ -288,10 +285,9 @@ module.exports = {
                 }
 
                 const dataColaborador = new Date(colaborador.dataAgenda).toISOString().split('T', 1)[0]
-                if (colaborador.objAgenda && dataColaborador === data) {
-                    const objAgendaSubtraido = subtrairObjAgenda(colaborador.objAgenda, idSolicitacao);
+                if(colaborador.objAgenda && dataColaborador === data && colaborador.idSolicitacao !== Number(idSolicitacao)) {
                     colaboradoresGrouped[idColaborador].objAgenda.push({
-                        objAgenda: objAgendaSubtraido
+                        objAgenda: colaborador.objAgenda
                     })
                 }
             })
