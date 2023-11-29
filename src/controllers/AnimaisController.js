@@ -59,6 +59,7 @@ module.exports = {
                 status
             }).where({ idAnimal })
 
+            const existingAnimal = await knex('animais').where({ rga }).first()
             if (rga !== existingAnimal.rga) {
                 const rgaInUse = await knex('animais').where({ rga }).first()
                 if (rgaInUse) {
