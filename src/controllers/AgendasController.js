@@ -187,6 +187,7 @@ module.exports = {
                     .where('especialidades.idColaborador', idColaborador)
                     .andWhere('solicitacoes_de_servicos.data', new Date(data).toISOString().split('T', 1)[0])
                     .andWhere('execucoes.idEspecialidade', idEspecialidade)
+                    .andWhere('solicitacoes_de_servicos.status', 'not like', 'Cancelado')
     
                 const resultadoSoma = somarObjAgendas(horariosOcupados.map(item => item.agenda))
                 const existeValorIgual = [...resultadoSoma].some((bit, index) => bit === '1' && agendaExecucao[index] === '1')
