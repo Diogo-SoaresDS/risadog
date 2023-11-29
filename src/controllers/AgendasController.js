@@ -240,8 +240,9 @@ module.exports = {
         try {
             await knex('execucoes')
                 .innerJoin('item_solicitacao', 'item_solicitacao.idItemSolicitacao', 'execucoes.idItemSolicitacao')
+                .innerJoin('solicitacoes_de_servicos', 'solicitacoes_de_servicos.idSolicitacao', 'item_solicitacao.idSolicitacao')
                 .where('item_solicitacao.idSolicitacao', idSolicitacao)
-                .update({ idItemSolicitacao: null })
+                .update('solicitacoes_de_servicos.status', '')
 
             for (const execucao of execucoes) {
                 const { idColaborador, idEspecialidade, agendaExecucao } = execucao;
@@ -254,7 +255,7 @@ module.exports = {
                     .where('especialidades.idColaborador', idColaborador)
                     .andWhere('solicitacoes_de_servicos.data', new Date(data).toISOString().split('T', 1)[0])
                     .andWhere('execucoes.idEspecialidade', idEspecialidade)
-                    .andWhereNotNull('execucoes.status')
+                    .andWhere('solicitacoes_de_servicos.status', 'not like', '')
     
                 const resultadoSoma = somarObjAgendas(horariosOcupados.map(item => item.agenda))
                 const existeValorIgual = [...resultadoSoma].some((bit, index) => bit === '1' && agendaExecucao[index] === '1')
