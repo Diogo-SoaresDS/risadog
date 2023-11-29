@@ -256,6 +256,7 @@ module.exports = {
                     .where('especialidades.idColaborador', idColaborador)
                     .andWhere('solicitacoes_de_servicos.data', new Date(data).toISOString().split('T', 1)[0])
                     .andWhere('execucoes.idEspecialidade', idEspecialidade)
+                    .andWhere('solicitacoes_de_servicos.status', 'not like', 'Cancelado')
                     .andWhere('solicitacoes_de_servicos.status', 'not like', '')
     
                 const resultadoSoma = somarObjAgendas(horariosOcupados.map(item => item.agenda))
