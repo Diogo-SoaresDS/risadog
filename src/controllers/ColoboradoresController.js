@@ -181,6 +181,7 @@ module.exports = {
                     'colaboradores.nome as nomeColaborador',
                     'execucoes.agenda as objAgenda',
                     'item_solicitacao.data as dataAgenda',
+                    'solicitacoes_de_servicos.status as status',
                     'especialidades.idEspecialidade as idEspecialidade',
                     'especialidades.idServicos as idServico',
                     'servicos.nome as nomeServico'
