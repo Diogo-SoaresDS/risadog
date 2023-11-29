@@ -14,10 +14,6 @@ module.exports = {
             for (const animal of animais) {
                 const { idAnimal, nome, especie, raca, genero, rga, obs } = animal
 
-                const existingAnimal = await knex('animais').where({ rga }).first()
-                if (existingAnimal) 
-                    return res.status(400).json({ error: 'RGA já está em uso.' })
-
                 const novoAnimal = {
                     idAnimal,
                     nome,
@@ -58,14 +54,6 @@ module.exports = {
                 obs,
                 status
             }).where({ idAnimal })
-
-            const existingAnimal = await knex('animais').where({ rga }).first()
-            if (rga !== existingAnimal.rga) {
-                const rgaInUse = await knex('animais').where({ rga }).first()
-                if (rgaInUse) {
-                    return res.status(400).json({ error: 'Novo RGA já está em uso.' })
-                }
-            }
 
             return res.send({ message: 'Animal atualizado com sucesso' })
         } catch (error) {

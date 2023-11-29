@@ -61,14 +61,6 @@ module.exports = {
                 for (const animal of animais) {
                     const { idAnimal, nome, especie, raca, genero, porte, rga, obs } = animal
 
-                    const existingAnimal = await knex('animais').where({ rga }).first()
-                    if (rga !== existingAnimal.rga) {
-                        const rgaInUse = await knex('animais').where({ rga }).first()
-                        if (rgaInUse) {
-                            return res.status(400).json({ error: 'Novo RGA já está em uso.' })
-                        }
-                    }
-    
                     if (existingAnimalIds.includes(idAnimal)) {
                         await knex('animais').update({ status: 'Ativo' }).where({ idAnimal })
                     } else {
@@ -159,9 +151,9 @@ module.exports = {
         let query = knex('clientes')
 
         if (!isNaN(valor)) {
-            query.where('cpf', 'like', `%${valor}%`)
+            query.where('cpf', 'like', `${valor}%`)
         } else {
-            query.where('nome', 'like', `%${valor}%`)
+            query.where('nome', 'like', `${valor}%`)
         }
 
         try {
@@ -215,10 +207,6 @@ module.exports = {
             if (Array.isArray(animais) && animais.length > 0) {
                 for (const animal of animais) {
                     const { idAnimal, nome, especie, raca, genero, porte, rga, obs } = animal
-                    
-                    const existingAnimal = await knex('animais').where({ rga }).first()
-                    if (existingAnimal) 
-                        return res.status(400).json({ error: 'RGA já está em uso.' })
 
                     const novoAnimal = {
                         idAnimal,
